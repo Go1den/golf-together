@@ -27,6 +27,7 @@ class Client:
         self.clientSocket.send(bytes(msg, "utf8"))
         if msg == "!quit":
             self.clientSocket.close()
+            self.clientWindow.addText("<System> You have left the lobby.")
 
     def closeConnection(self, event=None):
         self.send("!quit")

@@ -41,14 +41,14 @@ class Server:
 
         while True:
             msg = client.recv(self.bufferSize)
-            if msg != bytes("!quit", "utf8"):
-                self.broadcast(msg, "<" + name + "> ")
-            else:
-                client.send(bytes("!quit", "utf8"))
+            if msg == bytes("!quit", "utf8"):
                 client.close()
                 del self.clients[client]
                 self.broadcast(bytes("<System> %s disconnected." % name, "utf8"))
+                print("Number of clients is now: " + str(len(self.clients)))
                 break
+            else:
+                self.broadcast(msg, "<" + name + "> ")
 
     def broadcast(self, msg, prefix=""):
         print(prefix + str(msg.decode("utf-8")))
