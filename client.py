@@ -1,5 +1,6 @@
 from socket import socket, AF_INET, SOCK_STREAM
 from threading import Thread
+from tkinter import NORMAL, DISABLED
 
 class Client:
     def __init__(self, host: str = '', port: int = 33000, bufferSize: int = 1024, clientWindow=None):
@@ -19,13 +20,31 @@ class Client:
         while True:
             try:
                 msg = self.clientSocket.recv(self.bufferSize).decode("utf8")
-                self.clientWindow.addText(msg)
+                if msg.startswith("!setgame"):
+                    self.clientWindow.addText("<System> Host sets game to " + msg[9:])
+                elif msg.startswith("!setcourse"):
+                    splitMessage = msg[10:].split('[')
+                    self.clientWindow.addText("<System> Host sets course to" + splitMessage[0])
+                    self.clientWindow.setPars(splitMessage[1].rstrip("]"))
+                elif msg.startswith("!startgame"):
+                    self.clientWindow.addText("<System> Host starts game.")
+                    self.clientWindow.setStateOfAllScoreButtons(NORMAL)
+                elif msg.startswith("!endgame"):
+                    self.clientWindow.addText("<System> Host ends game.")
+                    self.clientWindow.setStateOfAllScoreButtons(DISABLED)
+                    self.clientWindow.resetGame()
+                elif msg.startswith("!quit"):
+                    pass
+                else:
+                    self.clientWindow.addText(msg)
             except OSError:  # Possibly client has left the chat.
                 break
 
     def send(self, msg):  # event is passed by binders.
         self.clientSocket.send(bytes(msg, "utf8"))
         if msg == "!quit":
+            self.clientWindow.resetGame()
+            self.clientWindow.resetOnLogoff()
             self.clientSocket.close()
             self.clientWindow.addText("<System> You have left the lobby.")
 

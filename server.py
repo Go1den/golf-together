@@ -1,4 +1,4 @@
-from socket import AF_INET, socket, SOCK_STREAM
+from socket import AF_INET, socket, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
 from threading import Thread
 
 class Server:
@@ -12,6 +12,7 @@ class Server:
         self.clients = {}
         self.connectedAddresses = {}
         self.server = socket(AF_INET, SOCK_STREAM)
+        self.server.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.server.bind(self.address)
         self.server.listen(self.backlog)
         self.clientWindow.addText("<System> Starting server...")
@@ -24,12 +25,15 @@ class Server:
         self.server.close()
 
     def acceptIncomingConnections(self):
-        while True:
-            client, client_address = self.server.accept()
-            print(str(client_address) + " has connected.")
-            client.send(bytes("<System> Type your name and press enter!", "utf8"))
-            self.connectedAddresses[client] = client_address
-            Thread(target=self.handleClient, args=(client,)).start()
+        try:
+            while True:
+                client, client_address = self.server.accept()
+                print(str(client_address) + " has connected.")
+                client.send(bytes("<System> Type your name and press enter!", "utf8"))
+                self.connectedAddresses[client] = client_address
+                Thread(target=self.handleClient, args=(client,)).start()
+        except:
+            self.shutdownServer()
 
     def handleClient(self, client):
         name = client.recv(self.bufferSize).decode("utf8")
@@ -47,6 +51,8 @@ class Server:
                 self.broadcast(bytes("<System> %s disconnected." % name, "utf8"))
                 print("Number of clients is now: " + str(len(self.clients)))
                 break
+            elif msg == bytes("!startgame", "utf8") or msg == bytes("!endgame", "utf8"):
+                self.broadcast(bytes(msg))
             else:
                 self.broadcast(msg, "<" + name + "> ")
 
@@ -54,3 +60,8 @@ class Server:
         print(prefix + str(msg.decode("utf-8")))
         for sock in self.clients:
             sock.send(bytes(prefix, "utf8") + msg)
+
+    def closeAllConnections(self):
+        for client in self.clients:
+            client.close()
+            del self.clients[client]

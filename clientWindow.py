@@ -42,7 +42,7 @@ class ClientWindow(Tk):
         self.textChat = Text(self.chatboxFrame, width=54, height=20, state=DISABLED, yscrollcommand=self.scrollBar.set, wrap=WORD)
         self.textChat.bindtags((str(self.textChat), str(self), "all"))
         self.textChat.grid(row=0, column=0, padx=(4, 0), pady=4, sticky=NSEW)
-        self.scrollBar.grid(row=0, column=1, padx=(0, 4), pady=4, sticky='nsw') #TODO this is broken not scrolling trash lul
+        self.scrollBar.grid(row=0, column=1, padx=(0, 4), pady=4, sticky='nsw')  # TODO this is broken not scrolling trash lul
         self.chatboxFrame.grid(row=0, padx=4, pady=(4, 0), sticky=NSEW)
         self.chatEntryFrame = Frame(self.chatFrame)
         self.entryChat = Entry(self.chatEntryFrame, width=60, textvariable=self.myChatLine, state=DISABLED)
@@ -93,7 +93,7 @@ class ClientWindow(Tk):
         self.score17 = IntVar()
         self.score18 = IntVar()
         self.scores = [self.score1, self.score2, self.score3, self.score4, self.score5, self.score6, self.score7, self.score8, self.score9,
-                     self.score10, self.score11, self.score12, self.score13, self.score14, self.score15, self.score16, self.score17, self.score18]
+                       self.score10, self.score11, self.score12, self.score13, self.score14, self.score15, self.score16, self.score17, self.score18]
 
         self.currentHole = 1
         self.totalPar = IntVar()
@@ -106,14 +106,12 @@ class ClientWindow(Tk):
         self.buttonHost.grid(row=1, padx=4, pady=4, sticky=EW)
         self.buttonJoin = Button(self.hostOrJoinFrame, text="Join Lobby", command=lambda: self.joinLobby())
         self.buttonJoin.grid(row=2, padx=4, pady=4, sticky=EW)
-        self.buttonLeave = Button(self.hostOrJoinFrame, text="Leave Lobby", command=lambda: self.joinLobby(), state=DISABLED)
+        self.buttonLeave = Button(self.hostOrJoinFrame, text="Leave Lobby", state=DISABLED, command=lambda: self.client.send("!quit"))
         self.buttonLeave.grid(row=3, padx=4, pady=4, sticky=EW)
-        self.buttonStartGame = Button(self.hostOrJoinFrame, text="Start Game", state=DISABLED)
+        self.buttonStartGame = Button(self.hostOrJoinFrame, text="Start Game", state=DISABLED, command=self.onStartGame)
         self.buttonStartGame.grid(row=4, padx=4, pady=4, sticky=EW)
-        self.buttonReady = Button(self.hostOrJoinFrame, text="Join Game", state=DISABLED)
-        self.buttonReady.grid(row=5, padx=4, pady=4, sticky=EW)
-        self.buttonEndGame = Button(self.hostOrJoinFrame, text="End Game", state=DISABLED)
-        self.buttonEndGame.grid(row=6, padx=4, pady=4, sticky=EW)
+        self.buttonEndGame = Button(self.hostOrJoinFrame, text="End Game", state=DISABLED, command=self.onEndGame)
+        self.buttonEndGame.grid(row=5, padx=4, pady=4, sticky=EW)
         self.hostOrJoinFrame.grid(row=0, column=1, padx=4, pady=4, sticky=NSEW)
 
         self.courseFrame = Frame(self, bd=2, relief=GROOVE)
@@ -255,7 +253,7 @@ class ClientWindow(Tk):
         self.scoreFrame.grid(row=2, column=0, columnspan=2, padx=4, pady=4, sticky=NSEW)
 
         self.scoreInputFrame = Frame(self, bd=2, relief=GROOVE)
-        self.buttonHoleInOne = Button(self.scoreInputFrame, text="Hole in One", width=16, command=lambda: self.recordScore(1), state=DISABLED)
+        self.buttonHoleInOne = Button(self.scoreInputFrame, text="Hole in One", width=20, command=lambda: self.recordScore(1), state=DISABLED)
         self.buttonHoleInOne.grid(row=0, column=0, padx=4, pady=4, sticky=NSEW)
         self.buttonAlbatross = Button(self.scoreInputFrame, text="Albatross (-3)", command=lambda: self.recordScore(self.getCurrentHolePar() - 3), state=DISABLED)
         self.buttonAlbatross.grid(row=1, column=0, padx=4, pady=4, sticky=NSEW)
@@ -265,7 +263,7 @@ class ClientWindow(Tk):
         self.buttonBirdie.grid(row=3, column=0, padx=4, pady=4, sticky=NSEW)
         self.buttonPar = Button(self.scoreInputFrame, text="Par (0)", command=lambda: self.recordScore(self.getCurrentHolePar()), state=DISABLED)
         self.buttonPar.grid(row=0, column=1, padx=4, pady=4, sticky=NSEW)
-        self.buttonBogey = Button(self.scoreInputFrame, text="Bogey (+1)", width=16, command=lambda: self.recordScore(self.getCurrentHolePar() + 1), state=DISABLED)
+        self.buttonBogey = Button(self.scoreInputFrame, text="Bogey (+1)", width=20, command=lambda: self.recordScore(self.getCurrentHolePar() + 1), state=DISABLED)
         self.buttonBogey.grid(row=1, column=1, padx=4, pady=4, sticky=NSEW)
         self.buttonDoubleBogey = Button(self.scoreInputFrame, text="Double Bogey (+2)", command=lambda: self.recordScore(self.getCurrentHolePar() + 2), state=DISABLED)
         self.buttonDoubleBogey.grid(row=2, column=1, padx=4, pady=4, sticky=NSEW)
@@ -275,7 +273,7 @@ class ClientWindow(Tk):
         self.button4OverPar.grid(row=0, column=2, padx=4, pady=4, sticky=NSEW)
         self.button5OverPar = Button(self.scoreInputFrame, text="Five Over Par (+5)", command=lambda: self.recordScore(self.getCurrentHolePar() + 5), state=DISABLED)
         self.button5OverPar.grid(row=1, column=2, padx=4, pady=4, sticky=NSEW)
-        self.button6OverPar = Button(self.scoreInputFrame, text="Six Over Par (+6)", width=16, command=lambda: self.recordScore(self.getCurrentHolePar() + 6), state=DISABLED)
+        self.button6OverPar = Button(self.scoreInputFrame, text="Six Over Par (+6)", width=20, command=lambda: self.recordScore(self.getCurrentHolePar() + 6), state=DISABLED)
         self.button6OverPar.grid(row=2, column=2, padx=4, pady=4, sticky=NSEW)
         self.button7OverPar = Button(self.scoreInputFrame, text="Seven Over Par (+7)", command=lambda: self.recordScore(self.getCurrentHolePar() + 7), state=DISABLED)
         self.button7OverPar.grid(row=3, column=2, padx=4, pady=4, sticky=NSEW)
@@ -285,7 +283,7 @@ class ClientWindow(Tk):
         self.button9OverPar.grid(row=1, column=3, padx=4, pady=4, sticky=NSEW)
         self.button10OverPar = Button(self.scoreInputFrame, text="Ten Over Par (+10)", command=lambda: self.recordScore(self.getCurrentHolePar() + 10), state=DISABLED)
         self.button10OverPar.grid(row=2, column=3, padx=4, pady=4, sticky=NSEW)
-        self.buttonClearMostRecentHole = Button(self.scoreInputFrame, text="Clear Most Recent", width=16, command=lambda: self.clearMostRecentScore(), state=DISABLED)
+        self.buttonClearMostRecentHole = Button(self.scoreInputFrame, text="Clear Most Recent", width=20, command=lambda: self.clearMostRecentScore(), state=DISABLED)
         self.buttonClearMostRecentHole.grid(row=3, column=3, padx=4, pady=4, sticky=NSEW)
         self.scoreInputFrame.grid(row=3, column=0, columnspan=2, padx=4, pady=4, sticky=NSEW)
 
@@ -304,9 +302,9 @@ class ClientWindow(Tk):
             self.client = Client(gethostbyname(gethostname()), 33000, 1024, self)
             self.isHost = True
             self.toggleChat()
-            self.toggleGameButtons()
             self.toggleLobby()
             self.toggleCourseButtons()
+            self.comboboxCourse.bind("<<ComboboxSelected>>", self.onCourseSelect)
 
     def joinLobby(self):
         JoinLobbyWindow(self)
@@ -316,7 +314,9 @@ class ClientWindow(Tk):
 
     def sendChatMessage(self):
         if self.client and self.myChatLine.get():
-            self.client.send(self.myChatLine.get())
+            if not self.myChatLine.get().startswith("!startgame") and not self.myChatLine.get().startswith("!endgame") \
+                    and not self.myChatLine.get().startswith("!setcourse") and not self.myChatLine.get().startswith("!setgame"):
+                self.client.send(self.myChatLine.get())
             self.myChatLine.set("")
             self.entryChat.focus_set()
 
@@ -346,15 +346,13 @@ class ClientWindow(Tk):
             self.entryChat.configure(state=DISABLED)
             self.buttonChat.configure(state=DISABLED)
 
-    def toggleGameButtons(self):
-        if self.client and self.server and self.isHost:
-            self.buttonStartGame.configure(state=NORMAL)
-            self.buttonReady.configure(state=NORMAL)
-            self.buttonEndGame.configure(state=NORMAL)
-        else:
-            self.buttonStartGame.configure(state=DISABLED)
-            self.buttonReady.configure(state=DISABLED)
-            self.buttonEndGame.configure(state=DISABLED)
+    # def toggleGameButtons(self):
+    #     if self.client and self.server and self.isHost:
+    #         self.buttonStartGame.configure(state=NORMAL)
+    #         self.buttonEndGame.configure(state=NORMAL)
+    #     else:
+    #         self.buttonStartGame.configure(state=DISABLED)
+    #         self.buttonEndGame.configure(state=DISABLED)
 
     def recordScore(self, score):
         if self.currentHole < 19:
@@ -368,6 +366,13 @@ class ClientWindow(Tk):
             self.currentHole -= 1
             self.updateTotalScore()
 
+    def setPars(self, pars):
+        idx = 0
+        parsAsList = pars.split(",")
+        for par in self.pars:
+            par.set(int(parsAsList[idx]))
+            idx += 1
+
     def getCurrentHolePar(self) -> int:
         try:
             result = self.pars[self.currentHole - 1].get()
@@ -377,6 +382,27 @@ class ClientWindow(Tk):
 
     def updateTotalScore(self):
         self.totalScore.set(sum(x.get() for x in self.scores))
+
+    def onCourseSelect(self, e):
+        self.server.broadcast(bytes("!setcourse \"" + self.comboboxCourse.get() + "\" " + self.lookupCoursePars(), "utf8"))
+        self.buttonStartGame.configure(state=NORMAL)
+
+    def onStartGame(self):
+        self.server.broadcast(bytes("!startgame", "utf8"))
+        self.buttonStartGame.configure(state=DISABLED)
+        self.buttonEndGame.configure(state=NORMAL)
+        self.comboboxGame.configure(state=DISABLED)
+        self.comboboxCourse.configure(state=DISABLED)
+
+    def onEndGame(self):
+        self.server.broadcast(bytes("!endgame", "utf8"))
+        self.buttonStartGame.configure(state=NORMAL)
+        self.buttonEndGame.configure(state=DISABLED)
+        self.comboboxGame.set("")
+        self.comboboxCourse.set("")
+        self.comboboxGame.configure(state="readonly")
+        self.comboboxCourse.configure(state="readonly")
+        self.comboboxGame.focus_set()
 
     def getGames(self) -> list[Game]:
         games = []
@@ -397,6 +423,56 @@ class ClientWindow(Tk):
         if game:
             self.courseList = [x.name for x in game[0].courses]
             self.comboboxCourse.configure(values=self.courseList)
+        self.server.broadcast(bytes("!setgame " + self.comboboxGame.get(), "utf8"))
+
+    def resetGame(self):
+        self.currentHole = 1
+        for x in self.pars:
+            x.set(0)
+        for y in self.scores:
+            y.set(0)
+        self.updateTotalScore()
+        self.setStateOfAllScoreButtons(DISABLED)
+
+    def resetOnLogoff(self):
+        if self.server:
+            self.server.closeAllConnections()
+            self.server.server.close()
+            self.client = None
+            self.server = None
+            self.isHost = False
+        self.buttonHost.configure(state=NORMAL)
+        self.buttonJoin.configure(state=NORMAL)
+        self.buttonLeave.configure(state=DISABLED)
+        self.buttonStartGame.configure(state=DISABLED)
+        self.buttonEndGame.configure(state=DISABLED)
+        self.entryChat.configure(state=DISABLED)
+        self.buttonChat.configure(state=DISABLED)
+        self.comboboxGame.configure(state=DISABLED)
+        self.comboboxCourse.configure(state=DISABLED)
+
+    def setStateOfAllScoreButtons(self, newState):
+        self.buttonHoleInOne.configure(state=newState)
+        self.buttonAlbatross.configure(state=newState)
+        self.buttonEagle.configure(state=newState)
+        self.buttonBirdie.configure(state=newState)
+        self.buttonPar.configure(state=newState)
+        self.buttonBogey.configure(state=newState)
+        self.buttonDoubleBogey.configure(state=newState)
+        self.buttonTripleBogey.configure(state=newState)
+        self.button4OverPar.configure(state=newState)
+        self.button5OverPar.configure(state=newState)
+        self.button6OverPar.configure(state=newState)
+        self.button7OverPar.configure(state=newState)
+        self.button8OverPar.configure(state=newState)
+        self.button9OverPar.configure(state=newState)
+        self.button10OverPar.configure(state=newState)
+        self.buttonClearMostRecentHole.configure(state=newState)
+
+    def lookupCoursePars(self):
+        game = next(g for g in self.games if g.name == self.comboboxGame.get())
+        course = next(c for c in game.courses if c.name == self.comboboxCourse.get())
+        return course.getParsAsString()
 
     def exit(self):
         if self.client:

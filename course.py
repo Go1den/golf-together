@@ -3,3 +3,6 @@ class Course:
         self.name = name
         self.parList = parList if parList else []
         self.courseScore = sum(self.parList)
+
+    def getParsAsString(self):
+        return str(self.parList)
