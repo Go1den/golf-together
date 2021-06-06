@@ -1,4 +1,4 @@
-from tkinter import Toplevel, Frame, Label, Entry, E, W, NSEW, Button, SE
+from tkinter import Toplevel, Frame, Label, Entry, E, W, NSEW, Button, SE, messagebox
 
 from client import Client
 
@@ -24,17 +24,22 @@ class JoinLobbyWindow:
         self.entryFrame.grid(row=0, padx=4, pady=4, sticky=NSEW)
 
         self.buttonFrame = Frame(self.window)
-        self.buttonOk = Button(self.buttonFrame, text="OK", width=8)
+        self.buttonOk = Button(self.buttonFrame, text="OK", width=8, command=lambda: self.connectToLobby())
         self.buttonOk.grid(row=0, column=0, padx=4, pady=4, sticky=SE)
-        self.buttonCancel = Button(self.buttonFrame, text="Cancel", width=8, command = lambda: self.window.destroy())
+        self.buttonCancel = Button(self.buttonFrame, text="Cancel", width=8, command=lambda: self.window.destroy())
         self.buttonCancel.grid(row=0, column=1, padx=4, pady=4, sticky=SE)
         self.buttonFrame.grid(row=1, padx=4, pady=4, sticky=SE)
 
         self.window.deiconify()
         self.window.mainloop()
 
-    def connectToLobby(self, c):
-        self.parent.client = Client(self.entryAddress.get(), self.entryPort.get(), 1024, self.parent)
+    def connectToLobby(self):
+        try:
+            self.parent.client = Client(self.entryAddress.get(), int(self.entryPort.get()), 1024, self.parent)
+        except TimeoutError:
+            messagebox.showerror("Error", "Attempt to connect timed out. Did you enter the right info?", parent=self.window)
+            self.parent.client = None
+            return
         self.parent.isHost = False
         self.parent.toggleChat()
         self.parent.toggleGameButtons()
