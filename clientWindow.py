@@ -1,9 +1,14 @@
+import json
+import os
 import sys
 from socket import gethostbyname, gethostname
 from tkinter import Tk, Frame, Text, NSEW, DISABLED, Label, EW, Button, GROOVE, CENTER, W, E, IntVar, Scrollbar, WORD, Entry, END, StringVar, NORMAL, Menu
 from tkinter.ttk import Combobox
 
 from client import Client
+from course import Course
+from game import Game
+from joinLobbyWindow import JoinLobbyWindow
 from server import Server
 
 class ClientWindow(Tk):
@@ -14,6 +19,10 @@ class ClientWindow(Tk):
         self.title("Golf Together")
         self.iconbitmap('golfTogether.ico')
         self.protocol("WM_DELETE_WINDOW", lambda: self.exit())
+
+        self.games = self.getGames()
+        self.gamesList = [x.name for x in self.games]
+        self.courseList = []
 
         self.server = None
         self.client = None
@@ -112,11 +121,12 @@ class ClientWindow(Tk):
         self.labelCourseOptions.grid(row=0, padx=4, pady=4, sticky=EW)
         self.labelGame = Label(self.courseFrame, text="Game:")
         self.labelGame.grid(row=1, padx=4, pady=4, sticky=W)
-        self.comboboxGame = Combobox(self.courseFrame, values=["Game 1", "Game 2"], state=DISABLED)
+        self.comboboxGame = Combobox(self.courseFrame, values=self.gamesList, state=DISABLED)
         self.comboboxGame.grid(row=2, padx=4, pady=4, sticky=W)
+        self.comboboxGame.bind("<<ComboboxSelected>>", self.updateCourses)
         self.labelCourse = Label(self.courseFrame, text="Course:")
         self.labelCourse.grid(row=3, padx=4, pady=4, sticky=W)
-        self.comboboxCourse = Combobox(self.courseFrame, values=["Course 1", "Course 2"], state=DISABLED)
+        self.comboboxCourse = Combobox(self.courseFrame, values=self.courseList, state=DISABLED)
         self.comboboxCourse.grid(row=4, padx=4, pady=4, sticky=W)
         self.courseFrame.grid(row=1, column=1, padx=4, pady=4, sticky=NSEW)
 
@@ -296,9 +306,10 @@ class ClientWindow(Tk):
             self.toggleChat()
             self.toggleGameButtons()
             self.toggleLobby()
+            self.toggleCourseButtons()
 
     def joinLobby(self):
-        pass
+        JoinLobbyWindow(self)
 
     def sendChatMessageOnEnter(self, e):
         self.sendChatMessage()
@@ -308,6 +319,14 @@ class ClientWindow(Tk):
             self.client.send(self.myChatLine.get())
             self.myChatLine.set("")
             self.entryChat.focus_set()
+
+    def toggleCourseButtons(self):
+        if self.client and self.server and self.isHost:
+            self.comboboxCourse.configure(state="readonly")
+            self.comboboxGame.configure(state="readonly")
+        else:
+            self.comboboxCourse.configure(state=DISABLED)
+            self.comboboxGame.configure(state=DISABLED)
 
     def toggleLobby(self):
         if self.client:
@@ -338,14 +357,12 @@ class ClientWindow(Tk):
             self.buttonEndGame.configure(state=DISABLED)
 
     def recordScore(self, score):
-        print("current hole is " + str(self.currentHole))
         if self.currentHole < 19:
             self.scores[self.currentHole - 1].set(score)
             self.currentHole += 1
             self.updateTotalScore()
 
     def clearMostRecentScore(self):
-        print("current hole is " + str(self.currentHole))
         if self.currentHole > 1:
             self.scores[self.currentHole - 2].set(0)
             self.currentHole -= 1
@@ -360,6 +377,26 @@ class ClientWindow(Tk):
 
     def updateTotalScore(self):
         self.totalScore.set(sum(x.get() for x in self.scores))
+
+    def getGames(self) -> list[Game]:
+        games = []
+        try:
+            for filePath in os.listdir(os.getcwd() + '/courses'):
+                courses = []
+                with open('courses/' + filePath, encoding="utf8") as f:
+                    thisJson = json.load(f)
+                    for course in thisJson.get("courses", []):
+                        courses.append(Course(course.get("name"), course.get("parList")))
+                    games.append(Game(thisJson.get("game", "Unknown Course"), courses))
+            return games
+        except:
+            return []
+
+    def updateCourses(self, e):
+        game = [x for x in self.games if x.name == self.comboboxGame.get()]
+        if game:
+            self.courseList = [x.name for x in game[0].courses]
+            self.comboboxCourse.configure(values=self.courseList)
 
     def exit(self):
         if self.client:
