@@ -6,7 +6,7 @@ class HostWindow:
         self.window = Toplevel(parent)
         self.window.withdraw()
         self.window.resizable(False, False)
-        self.window.title("Join")
+        self.window.title("Host")
         self.window.iconbitmap('golfTogether.ico')
         self.window.grab_set()
 
