@@ -9,6 +9,7 @@ class JoinLobbyWindow:
         self.window.withdraw()
         self.window.resizable(False, False)
         self.window.title("Join")
+        self.window.geometry('+{x}+{y}'.format(x=parent.winfo_x(), y=parent.winfo_y()))
         self.window.iconbitmap('golfTogether.ico')
         self.window.grab_set()
 

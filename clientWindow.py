@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import uuid
 from socket import gethostbyname, gethostname
 from tkinter import Tk, Frame, Text, NSEW, DISABLED, Label, EW, Button, GROOVE, CENTER, W, E, IntVar, Scrollbar, WORD, Entry, END, StringVar, NORMAL, Menu
 
@@ -10,6 +11,7 @@ from courseSelectWindow import CourseSelectWindow
 from game import Game
 from hostWindow import HostWindow
 from joinLobbyWindow import JoinLobbyWindow
+from player import Player
 from server import Server
 from validateUsername import validateUsername
 
@@ -29,6 +31,8 @@ class ClientWindow(Tk):
         self.server = None
         self.client = None
         self.isHost = False
+        self.myUUID = str(uuid.uuid4())
+        self.players = []
 
         self.menubar = Menu(self)
         self.fileMenu = Menu(self.menubar, tearoff=0, takefocus=0)
@@ -107,7 +111,7 @@ class ClientWindow(Tk):
 
         self.currentHole = 1
         self.totalPar = IntVar()
-        self.totalScore = IntVar()
+        self.totalScore = StringVar()
 
         self.hostOrJoinFrame = Frame(self, bd=2, relief=GROOVE)
         self.labelHostOrJoinFrame = Label(self.hostOrJoinFrame, text="Lobby Options")
@@ -127,42 +131,45 @@ class ClientWindow(Tk):
         self.scoreFrame = Frame(self, bd=2, relief=GROOVE)
         self.labelHole = Label(self.scoreFrame, text="Hole:")
         self.labelHole.grid(row=0, column=0, padx=4, pady=4, sticky=E)
-        self.label1 = Label(self.scoreFrame, text="1", width=2, bd=2, relief=GROOVE, anchor=CENTER)
+        self.label1 = Label(self.scoreFrame, text="1", width=2)
         self.label1.grid(row=0, column=1, padx=2, pady=4, sticky=NSEW)
-        self.label2 = Label(self.scoreFrame, text="2", width=2, bd=2, relief=GROOVE)
+        self.label2 = Label(self.scoreFrame, text="2", width=2)
         self.label2.grid(row=0, column=2, padx=2, pady=4, sticky=NSEW)
-        self.label3 = Label(self.scoreFrame, text="3", width=2, bd=2, relief=GROOVE)
+        self.label3 = Label(self.scoreFrame, text="3", width=2)
         self.label3.grid(row=0, column=3, padx=2, pady=4, sticky=NSEW)
-        self.label4 = Label(self.scoreFrame, text="4", width=2, bd=2, relief=GROOVE)
+        self.label4 = Label(self.scoreFrame, text="4", width=2)
         self.label4.grid(row=0, column=4, padx=2, pady=4, sticky=NSEW)
-        self.label5 = Label(self.scoreFrame, text="5", width=2, bd=2, relief=GROOVE)
+        self.label5 = Label(self.scoreFrame, text="5", width=2)
         self.label5.grid(row=0, column=5, padx=2, pady=4, sticky=NSEW)
-        self.label6 = Label(self.scoreFrame, text="6", width=2, bd=2, relief=GROOVE)
+        self.label6 = Label(self.scoreFrame, text="6", width=2)
         self.label6.grid(row=0, column=6, padx=2, pady=4, sticky=NSEW)
-        self.label7 = Label(self.scoreFrame, text="7", width=2, bd=2, relief=GROOVE)
+        self.label7 = Label(self.scoreFrame, text="7", width=2)
         self.label7.grid(row=0, column=7, padx=2, pady=4, sticky=NSEW)
-        self.label8 = Label(self.scoreFrame, text="8", width=2, bd=2, relief=GROOVE)
+        self.label8 = Label(self.scoreFrame, text="8", width=2)
         self.label8.grid(row=0, column=8, padx=2, pady=4, sticky=NSEW)
-        self.label9 = Label(self.scoreFrame, text="9", width=2, bd=2, relief=GROOVE)
+        self.label9 = Label(self.scoreFrame, text="9", width=2)
         self.label9.grid(row=0, column=9, padx=2, pady=4, sticky=NSEW)
-        self.label10 = Label(self.scoreFrame, text="10", width=2, bd=2, relief=GROOVE)
+        self.label10 = Label(self.scoreFrame, text="10", width=2)
         self.label10.grid(row=0, column=10, padx=2, pady=4, sticky=NSEW)
-        self.label11 = Label(self.scoreFrame, text="11", width=2, bd=2, relief=GROOVE)
+        self.label11 = Label(self.scoreFrame, text="11", width=2)
         self.label11.grid(row=0, column=11, padx=2, pady=4, sticky=NSEW)
-        self.label12 = Label(self.scoreFrame, text="12", width=2, bd=2, relief=GROOVE)
+        self.label12 = Label(self.scoreFrame, text="12", width=2)
         self.label12.grid(row=0, column=12, padx=2, pady=4, sticky=NSEW)
-        self.label13 = Label(self.scoreFrame, text="13", width=2, bd=2, relief=GROOVE)
+        self.label13 = Label(self.scoreFrame, text="13", width=2)
         self.label13.grid(row=0, column=13, padx=2, pady=4, sticky=NSEW)
-        self.label14 = Label(self.scoreFrame, text="14", width=2, bd=2, relief=GROOVE)
+        self.label14 = Label(self.scoreFrame, text="14", width=2)
         self.label14.grid(row=0, column=14, padx=2, pady=4, sticky=NSEW)
-        self.label15 = Label(self.scoreFrame, text="15", width=2, bd=2, relief=GROOVE)
+        self.label15 = Label(self.scoreFrame, text="15", width=2)
         self.label15.grid(row=0, column=15, padx=2, pady=4, sticky=NSEW)
-        self.label16 = Label(self.scoreFrame, text="16", width=2, bd=2, relief=GROOVE)
+        self.label16 = Label(self.scoreFrame, text="16", width=2)
         self.label16.grid(row=0, column=16, padx=2, pady=4, sticky=NSEW)
-        self.label17 = Label(self.scoreFrame, text="17", width=2, bd=2, relief=GROOVE)
+        self.label17 = Label(self.scoreFrame, text="17", width=2)
         self.label17.grid(row=0, column=17, padx=2, pady=4, sticky=NSEW)
-        self.label18 = Label(self.scoreFrame, text="18", width=2, bd=2, relief=GROOVE)
+        self.label18 = Label(self.scoreFrame, text="18", width=2)
         self.label18.grid(row=0, column=18, padx=2, pady=4, sticky=NSEW)
+
+        self.holeLabels = [self.label1, self.label2, self.label3, self.label4, self.label5, self.label6, self.label7, self.label8, self.label9,
+                           self.label10, self.label11, self.label12, self.label13, self.label14, self.label15, self.label16, self.label17, self.label18]
 
         self.labelPar = Label(self.scoreFrame, text="Par:")
         self.labelPar.grid(row=1, column=0, padx=4, pady=4, sticky=E)
@@ -243,7 +250,7 @@ class ClientWindow(Tk):
         self.labelScore17.grid(row=2, column=17, padx=2, pady=4, sticky=NSEW)
         self.labelScore18 = Label(self.scoreFrame, textvariable=self.score18, width=2, bd=2, relief=GROOVE)
         self.labelScore18.grid(row=2, column=18, padx=2, pady=4, sticky=NSEW)
-        self.labelScoreTotal = Label(self.scoreFrame, textvariable=self.totalScore, width=5, anchor=W)
+        self.labelScoreTotal = Label(self.scoreFrame, textvariable=self.totalScore, width=9, anchor=W)
         self.labelScoreTotal.grid(row=2, column=19, padx=2, pady=4, sticky=NSEW)
 
         self.scoreFrame.grid(row=2, column=0, columnspan=2, padx=4, pady=4, sticky=NSEW)
@@ -343,12 +350,38 @@ class ClientWindow(Tk):
             self.scores[self.currentHole - 1].set(score)
             self.currentHole += 1
             self.updateTotalScore()
+            self.highlightCurrentHole()
+            msg = "!setscore " + self.entryUsername.get() + " " + self.myUUID + " " + str(self.getTotalScore()) + " " + str(self.getPartialParScore()) + " " + str(
+                self.currentHole - 1)
+            self.client.send(msg)
+            self.updatePlayerScore(msg)
 
     def clearMostRecentScore(self):
         if self.currentHole > 1:
             self.scores[self.currentHole - 2].set(0)
             self.currentHole -= 1
             self.updateTotalScore()
+            self.highlightCurrentHole()
+            msg = "!setscore " + self.entryUsername.get() + " " + self.myUUID + " " + str(self.getTotalScore()) + " " + str(self.getPartialParScore()) + " " + str(
+                self.currentHole - 1)
+            self.client.send(msg)
+            self.updatePlayerScore(msg)
+
+    def updatePlayerScore(self, msg):
+        splitMsg = msg.split()
+        player = next((x for x in self.players if x.uuid == splitMsg[2]), None)
+        if not player:
+            self.players.append(Player(splitMsg[1], splitMsg[2], int(splitMsg[3]), int(splitMsg[4]), int(splitMsg[5])))
+        else:
+            player.score = int(splitMsg[3])
+            player.parThroughCurrentHole = int(splitMsg[4])
+            player.currentHole = int(splitMsg[5])
+            player.setRelativeScore()
+        self.printAllPlayerInfo()
+
+    def printAllPlayerInfo(self):
+        for p in self.players:
+            p.print()
 
     def setPars(self, pars):
         idx = 0
@@ -356,6 +389,7 @@ class ClientWindow(Tk):
         for par in self.pars:
             par.set(int(parsAsList[idx]))
             idx += 1
+        self.totalPar.set(sum([int(x) for x in parsAsList]))
 
     def getCurrentHolePar(self) -> int:
         try:
@@ -364,8 +398,27 @@ class ClientWindow(Tk):
         except IndexError:
             return 0
 
+    def getPartialParScore(self) -> int:
+        if self.currentHole == 1:
+            return 0
+        return sum([x.get() for x in self.pars[0:self.currentHole - 1]])
+
+    def getTotalScore(self) -> int:
+        return sum([x.get() for x in self.scores])
+
     def updateTotalScore(self):
-        self.totalScore.set(sum(x.get() for x in self.scores))
+        if self.currentHole == 1:
+            self.totalScore.set("0")
+        else:
+            self.totalScore.set(str(sum(x.get() for x in self.scores)) + " (" + self.getCurrentRelativeScore() + ")")
+
+    def getCurrentRelativeScore(self) -> str:
+        relScore = sum(x.get() for x in self.scores[0:self.currentHole - 1]) - sum(x.get() for x in self.pars[0:self.currentHole - 1])
+        if relScore == 0:
+            return "E"
+        elif relScore > 0:
+            return str("+") + str(relScore)
+        return str(relScore)
 
     def onHostLobby(self):
         if validateUsername(self.entryUsername.get(), self):
@@ -435,6 +488,12 @@ class ClientWindow(Tk):
         self.button9OverPar.configure(state=newState)
         self.button10OverPar.configure(state=newState)
         self.buttonClearMostRecentHole.configure(state=newState)
+
+    def highlightCurrentHole(self):
+        for hole in self.holeLabels:
+            hole.configure(background="SystemButtonFace")
+        if 0 < self.currentHole < 19:
+            self.holeLabels[self.currentHole - 1].configure(background="#00ff00")
 
     def exit(self):
         if self.client:

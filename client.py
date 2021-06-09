@@ -28,11 +28,15 @@ class Client:
                     self.clientWindow.setPars(splitMessage[1].rstrip("]"))
                 elif msg.startswith("!startgame"):
                     self.clientWindow.addText("<System> Host starts game.")
+                    self.clientWindow.highlightCurrentHole()
                     self.clientWindow.setStateOfAllScoreButtons(NORMAL)
+                    self.clientWindow.players = []
                 elif msg.startswith("!endgame"):
                     self.clientWindow.addText("<System> Host ends game.")
                     self.clientWindow.setStateOfAllScoreButtons(DISABLED)
                     self.clientWindow.resetGame()
+                elif msg.startswith("!setscore"):
+                    self.clientWindow.updatePlayerScore(msg)
                 elif msg.startswith("!quit"):
                     pass
                 else:
