@@ -1,0 +1,33 @@
+{
+    "game": "Mario Golf: Toadstool Tour",
+    "courses": [
+        {
+            "name": "Lakitu Valley",
+            "parList": [4, 4, 3, 4, 5, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 3, 5, 4]
+        },
+        {
+            "name": "Cheep Cheep Falls",
+            "parList": [4, 4, 3, 5, 4, 4, 3, 4, 5, 4, 3, 4, 5, 4, 3, 4, 5, 4]
+        },
+        {
+            "name": "Shifting Sands",
+            "parList": [4, 5, 4, 3, 4, 3, 5, 4, 4, 4, 4, 4, 3, 5, 4, 4, 3, 5]
+        },
+        {
+            "name": "Blooper Bay",
+            "parList": [4, 5, 3, 4, 4, 3, 4, 4, 5, 4, 3, 4, 5, 4, 4, 4, 3, 5]
+        },
+        {
+            "name": "Peach's Castle Grounds",
+            "parList": [4, 4, 3, 5, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 4, 4, 3, 5]
+        },
+        {
+            "name": "Bowser Badlands",
+            "parList": [4, 4, 5, 3, 4, 4, 3, 5, 4, 4, 3, 4, 5, 4, 4, 5, 4, 3]
+        },
+        {
+            "name": "Congo Canopy",
+            "parList": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+        }
+    ]
+}
