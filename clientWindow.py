@@ -112,6 +112,7 @@ class ClientWindow(Tk):
         self.currentHole = 1
         self.totalPar = IntVar()
         self.totalScore = StringVar()
+        self.totalScore.set("0")
 
         self.hostOrJoinFrame = Frame(self, bd=2, relief=GROOVE)
         self.labelHostOrJoinFrame = Label(self.hostOrJoinFrame, text="Lobby Options")
@@ -351,10 +352,9 @@ class ClientWindow(Tk):
             self.currentHole += 1
             self.updateTotalScore()
             self.highlightCurrentHole()
-            msg = "!setscore " + self.entryUsername.get() + " " + self.myUUID + " " + str(self.getTotalScore()) + " " + str(self.getPartialParScore()) + " " + str(
-                self.currentHole - 1)
+            msg = "!setscore " + self.entryUsername.get() + " " + self.myUUID + " " + str(self.getTotalScore()) + " " + str(self.getPartialParScore()) + " " \
+                  + str(self.currentHole - 1) + " " + str(self.scores[self.currentHole-2].get())
             self.client.send(msg)
-            self.updatePlayerScore(msg)
 
     def clearMostRecentScore(self):
         if self.currentHole > 1:
@@ -362,10 +362,9 @@ class ClientWindow(Tk):
             self.currentHole -= 1
             self.updateTotalScore()
             self.highlightCurrentHole()
-            msg = "!setscore " + self.entryUsername.get() + " " + self.myUUID + " " + str(self.getTotalScore()) + " " + str(self.getPartialParScore()) + " " + str(
-                self.currentHole - 1)
+            msg = "!setscore " + self.entryUsername.get() + " " + self.myUUID + " " + str(self.getTotalScore()) + " " + str(self.getPartialParScore()) + " " \
+                  + str(self.currentHole - 1)
             self.client.send(msg)
-            self.updatePlayerScore(msg)
 
     def updatePlayerScore(self, msg):
         splitMsg = msg.split()
@@ -377,6 +376,8 @@ class ClientWindow(Tk):
             player.parThroughCurrentHole = int(splitMsg[4])
             player.currentHole = int(splitMsg[5])
             player.setRelativeScore()
+        if len(splitMsg) == 7:
+            self.addText("<System> " + splitMsg[1] + " scored " + splitMsg[6] + " on hole " + splitMsg[5])
         self.printAllPlayerInfo()
 
     def printAllPlayerInfo(self):

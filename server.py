@@ -19,7 +19,6 @@ class Server:
         self.acceptIncomingConnectionsThread = Thread(target=self.acceptIncomingConnections, daemon=True)
         self.acceptIncomingConnectionsThread.start()
         self.clientWindow.addText("<System> The server is now live.")
-        # self.acceptIncomingConnectionsThread.join() #blocks the calling thread, we might not need/want this
 
     def shutdownServer(self):
         self.server.close()
@@ -29,7 +28,6 @@ class Server:
             while True:
                 client, client_address = self.server.accept()
                 print(str(client_address) + " has connected.")
-                client.send(bytes("<System> Type your name and press enter!", "utf8"))
                 self.connectedAddresses[client] = client_address
                 Thread(target=self.handleClient, args=(client,)).start()
         except:
@@ -51,7 +49,7 @@ class Server:
                 self.broadcast(bytes("<System> %s disconnected." % name, "utf8"))
                 print("Number of clients is now: " + str(len(self.clients)))
                 break
-            elif msg == bytes("!startgame", "utf8") or msg == bytes("!endgame", "utf8"):
+            elif msg == bytes("!startgame", "utf8") or msg == bytes("!endgame", "utf8") or msg.startswith(bytes("!setscore", "utf8")):
                 self.broadcast(bytes(msg))
             else:
                 self.broadcast(msg, "<" + name + "> ")
