@@ -56,6 +56,7 @@ class ClientWindow(Tk):
         self.textChat = Text(self.chatboxFrame, width=50, height=20, state=DISABLED, yscrollcommand=self.scrollBar.set, wrap=WORD)
         self.textChat.bindtags((str(self.textChat), str(self), "all"))
         self.textChat.grid(row=1, column=0, padx=(4, 0), pady=4, sticky=NSEW)
+        self.scrollBar.configure(command=self.textChat.yview)
         self.scrollBar.grid(row=1, column=1, padx=(0, 4), pady=4, sticky='nsw')  # TODO this is broken not scrolling trash lul
         self.chatboxFrame.grid(row=1, padx=4, pady=(4, 0), sticky=NSEW)
         self.chatEntryFrame = Frame(self.chatFrame)
@@ -299,6 +300,7 @@ class ClientWindow(Tk):
         self.textChat.configure(state=NORMAL)
         self.textChat.insert(END, text + "\n")
         self.textChat.configure(state=DISABLED)
+        self.textChat.see(END)
 
     def hostLobby(self, port):
         if not self.client:
@@ -454,6 +456,7 @@ class ClientWindow(Tk):
         for y in self.scores:
             y.set(0)
         self.updateTotalScore()
+        self.totalPar.set(0)
         self.setStateOfAllScoreButtons(DISABLED)
 
     def resetOnLogoff(self):
