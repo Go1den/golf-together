@@ -1,4 +1,4 @@
-from tkinter import Toplevel, Frame, Label, Entry, E, W, NSEW, Button, SE, messagebox
+from tkinter import Toplevel, Frame, Label, Entry, E, W, NSEW, Button, SE, messagebox, DISABLED
 
 from client import Client
 
@@ -37,6 +37,8 @@ class JoinLobbyWindow:
     def connectToLobby(self):
         try:
             self.parent.client = Client(self.entryAddress.get(), int(self.entryPort.get()), 1024, self.parent)
+            self.parent.client.send(self.parent.entryUsername.get())
+            self.parent.entryUsername.configure(state=DISABLED)
         except TimeoutError:
             messagebox.showerror("Error", "Attempt to connect timed out. Did you enter the right info?", parent=self.window)
             self.parent.client = None

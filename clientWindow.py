@@ -335,11 +335,11 @@ class ClientWindow(Tk):
     def drawLeaderboard(self):
         sortedPlayerList = sorted(self.players, key=lambda x: (x.score - x.parThroughCurrentHole, x.currentHole))
         sortedPlayerListChunks = self.splitListIntoChunks(sortedPlayerList, self.leaderboardSlots.get())
-        y = 66
         place = 1
         idx = 1
         previousPlayer = None
         for chunk in sortedPlayerListChunks:
+            y = 66
             for player in chunk:
                 if not previousPlayer or previousPlayer.scoreAsString != player.scoreAsString:
                     place = idx
