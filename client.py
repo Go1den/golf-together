@@ -41,10 +41,10 @@ class Client:
                     pass
                 else:
                     self.clientWindow.addText(msg)
-            except OSError:  # Possibly client has left the chat.
+            except OSError:
                 break
 
-    def send(self, msg):  # event is passed by binders.
+    def send(self, msg):
         self.clientSocket.send(bytes(msg, "utf8"))
         if msg == "!quit":
             self.clientWindow.resetGame()

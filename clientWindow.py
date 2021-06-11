@@ -1,9 +1,12 @@
 import json
 import os
 import sys
+import time
 import uuid
 from socket import gethostbyname, gethostname
-from tkinter import Tk, Frame, Text, NSEW, DISABLED, Label, EW, Button, GROOVE, CENTER, W, E, IntVar, Scrollbar, WORD, Entry, END, StringVar, NORMAL, Menu
+from threading import Thread
+from tkinter import Tk, Frame, Text, NSEW, DISABLED, Label, EW, Button, GROOVE, CENTER, W, E, IntVar, Scrollbar, WORD, Entry, END, StringVar, NORMAL, Menu, Canvas, NW
+from PIL.ImageTk import PhotoImage
 
 from client import Client
 from course import Course
@@ -42,7 +45,9 @@ class ClientWindow(Tk):
 
         self.myChatLine = StringVar()
 
-        self.chatFrame = Frame(self)
+        self.wholeWindowFrame = Frame()
+
+        self.chatFrame = Frame(self.wholeWindowFrame)
         self.chatboxFrame = Frame(self.chatFrame)
         self.scrollBar = Scrollbar(self.chatboxFrame)
 
@@ -115,7 +120,7 @@ class ClientWindow(Tk):
         self.totalScore = StringVar()
         self.totalScore.set("0")
 
-        self.hostOrJoinFrame = Frame(self, bd=2, relief=GROOVE)
+        self.hostOrJoinFrame = Frame(self.wholeWindowFrame, bd=2, relief=GROOVE)
         self.labelHostOrJoinFrame = Label(self.hostOrJoinFrame, text="Lobby Options")
         self.labelHostOrJoinFrame.grid(row=0, padx=4, pady=4, sticky=EW)
         self.buttonHost = Button(self.hostOrJoinFrame, text="Host Lobby", command=self.onHostLobby)
@@ -130,7 +135,7 @@ class ClientWindow(Tk):
         self.buttonEndGame.grid(row=5, padx=4, pady=4, sticky=EW)
         self.hostOrJoinFrame.grid(row=0, column=1, padx=4, pady=4, sticky=NSEW)
 
-        self.scoreFrame = Frame(self, bd=2, relief=GROOVE)
+        self.scoreFrame = Frame(self.wholeWindowFrame, bd=2, relief=GROOVE)
         self.labelHole = Label(self.scoreFrame, text="Hole:")
         self.labelHole.grid(row=0, column=0, padx=4, pady=4, sticky=E)
         self.label1 = Label(self.scoreFrame, text="1", width=2)
@@ -257,7 +262,7 @@ class ClientWindow(Tk):
 
         self.scoreFrame.grid(row=2, column=0, columnspan=2, padx=4, pady=4, sticky=NSEW)
 
-        self.scoreInputFrame = Frame(self, bd=2, relief=GROOVE)
+        self.scoreInputFrame = Frame(self.wholeWindowFrame, bd=2, relief=GROOVE)
         self.buttonHoleInOne = Button(self.scoreInputFrame, text="Hole in One", width=18, command=lambda: self.recordScore(1), state=DISABLED)
         self.buttonHoleInOne.grid(row=0, column=0, padx=4, pady=4, sticky=NSEW)
         self.buttonAlbatross = Button(self.scoreInputFrame, text="Albatross (-3)", command=lambda: self.recordScore(self.getCurrentHolePar() - 3), state=DISABLED)
@@ -292,9 +297,41 @@ class ClientWindow(Tk):
         self.buttonClearMostRecentHole.grid(row=3, column=3, padx=4, pady=4, sticky=NSEW)
         self.scoreInputFrame.grid(row=3, column=0, columnspan=2, padx=4, pady=4, sticky=NSEW)
 
+        self.canvasFrame = Frame(self.wholeWindowFrame)
+        self.canvas = Canvas(self.canvasFrame, bg="#00ff00", width=361, height=717)
+        self.canvas.grid(row=0, column=0, sticky=NSEW)
+
+        self.topOfLeaderboardImage = PhotoImage(file="images/leaderboard.png")
+        self.canvas.create_image(182, 24, image=self.topOfLeaderboardImage, tags="topOfLeaderboardImage")
+        self.img2 = PhotoImage(file="images/leaderboard2.png")
+
+        y = 66
+        for x in range(16):
+            self.canvas.create_image(182, y, image=self.img2, tags="rectangle")
+            y += 42
+
+        self.canvasFrame.grid(row=0, rowspan=4, column=2, padx=4, pady=4, sticky=NSEW)
+        self.wholeWindowFrame.grid()
+
         self.addText("<System> Welcome to Golf Together! To start, host or join a lobby.")
+        self.thread = Thread(target=self.leaderboardLoop, daemon=True).start()
         self.deiconify()
         self.mainloop()
+
+    def leaderboardLoop(self):
+        while True:
+            self.drawLeaderboard()
+
+    def drawLeaderboard(self):
+        y = 66
+        for player in self.players:
+            self.canvas.create_text(38, y, text="1", fill="white", font=("Franklin Gothic Medium", 18), anchor=E, tags="text")
+            self.canvas.create_text(72, y, text=player.name, fill="white", font=("Franklin Gothic Medium", 18), anchor=W, tags="text")
+            self.canvas.create_text(272, y, text=player.scoreAsString, font=("Franklin Gothic Medium", 18), tags="text")
+            self.canvas.create_text(336, y, text=player.currentHole, fill="white", font=("Franklin Gothic Medium", 18), tags="text")
+            y += 42
+        time.sleep(5)
+        self.canvas.delete("text")
 
     def addText(self, text):
         self.textChat.configure(state=NORMAL)
