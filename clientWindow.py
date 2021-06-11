@@ -68,7 +68,7 @@ class ClientWindow(Tk):
         self.comboboxLeaderboardSlots.bind("<<ComboboxSelected>>", self.onLeaderboardSlotsSelect)
         self.chatUsernameFrame.grid(row=0, padx=4, pady=(4, 0), sticky=NSEW)
 
-        self.textChat = Text(self.chatboxFrame, width=50, height=20, state=DISABLED, yscrollcommand=self.scrollBar.set, wrap=WORD)
+        self.textChat = Text(self.chatboxFrame, width=50, height=24, state=DISABLED, yscrollcommand=self.scrollBar.set, wrap=WORD)
         self.textChat.bindtags((str(self.textChat), str(self), "all"))
         self.textChat.grid(row=1, column=0, padx=(4, 0), pady=4, sticky=NSEW)
         self.scrollBar.configure(command=self.textChat.yview)
@@ -333,15 +333,31 @@ class ClientWindow(Tk):
             self.drawLeaderboard()
 
     def drawLeaderboard(self):
+        sortedPlayerList = sorted(self.players, key=lambda x: (x.score - x.parThroughCurrentHole, x.currentHole))
+        sortedPlayerListChunks = self.splitListIntoChunks(sortedPlayerList, self.leaderboardSlots.get())
         y = 66
-        for player in self.players:
-            self.canvas.create_text(38, y, text="1", fill="white", font=("Franklin Gothic Medium", 18), anchor=E, tags="text")
-            self.canvas.create_text(72, y, text=player.name, fill="white", font=("Franklin Gothic Medium", 18), anchor=W, tags="text")
-            self.canvas.create_text(272, y, text=player.scoreAsString, font=("Franklin Gothic Medium", 18), tags="text")
-            self.canvas.create_text(336, y, text=player.currentHole, fill="white", font=("Franklin Gothic Medium", 18), tags="text")
-            y += 42
-        time.sleep(5)
-        self.canvas.delete("text")
+        place = 1
+        idx = 1
+        previousPlayer = None
+        for chunk in sortedPlayerListChunks:
+            for player in chunk:
+                if not previousPlayer or previousPlayer.scoreAsString != player.scoreAsString:
+                    place = idx
+                self.canvas.create_text(38, y, text=place, fill="white", font=("Franklin Gothic Medium", 18), anchor=E, tags="text")
+                self.canvas.create_text(72, y, text=player.name, fill="white", font=("Franklin Gothic Medium", 18), anchor=W, tags="text")
+                self.canvas.create_text(270, y, text=player.scoreAsString, font=("Franklin Gothic Medium", 18), tags="text")
+                self.canvas.create_text(336, y, text=player.currentHole, fill="white", font=("Franklin Gothic Medium", 18), tags="text")
+                y += 42
+                idx += 1
+                previousPlayer = player
+            time.sleep(5)
+            self.canvas.delete("text")
+
+    def splitListIntoChunks(self, lst, chunkSize):
+        result = []
+        for i in range(0, len(lst), chunkSize):
+            result.append(lst[i:i + chunkSize])
+        return result
 
     def addText(self, text):
         self.textChat.configure(state=NORMAL)
