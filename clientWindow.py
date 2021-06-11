@@ -5,7 +5,9 @@ import time
 import uuid
 from socket import gethostbyname, gethostname
 from threading import Thread
-from tkinter import Tk, Frame, Text, NSEW, DISABLED, Label, EW, Button, GROOVE, CENTER, W, E, IntVar, Scrollbar, WORD, Entry, END, StringVar, NORMAL, Menu, Canvas, NW
+from tkinter import Tk, Frame, Text, NSEW, DISABLED, Label, EW, Button, GROOVE, CENTER, W, E, IntVar, Scrollbar, WORD, Entry, END, StringVar, NORMAL, Menu, Canvas, HIDDEN
+from tkinter.ttk import Combobox
+
 from PIL.ImageTk import PhotoImage
 
 from client import Client
@@ -50,12 +52,20 @@ class ClientWindow(Tk):
         self.chatFrame = Frame(self.wholeWindowFrame)
         self.chatboxFrame = Frame(self.chatFrame)
         self.scrollBar = Scrollbar(self.chatboxFrame)
+        self.leaderboardSlots = IntVar()
+        self.leaderboardSlots.set(16)
 
         self.chatUsernameFrame = Frame(self.chatFrame)
         self.labelUsername = Label(self.chatUsernameFrame, text="Username:")
         self.labelUsername.grid(row=0, column=0, padx=4, pady=4, sticky=W)
         self.entryUsername = Entry(self.chatUsernameFrame, width=20)
         self.entryUsername.grid(row=0, column=1, padx=4, pady=4, sticky=W)
+        self.labelLeaderboardSlots = Label(self.chatUsernameFrame, text="Leaderboard Slots:")
+        self.labelLeaderboardSlots.grid(row=0, column=2, padx=(20, 4), pady=4, sticky=W)
+        self.comboboxLeaderboardSlots = Combobox(self.chatUsernameFrame, width=3, values=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+                                                 textvariable=self.leaderboardSlots, state="readonly")
+        self.comboboxLeaderboardSlots.grid(row=0, column=3, padx=4, pady=4, sticky=W)
+        self.comboboxLeaderboardSlots.bind("<<ComboboxSelected>>", self.onLeaderboardSlotsSelect)
         self.chatUsernameFrame.grid(row=0, padx=4, pady=(4, 0), sticky=NSEW)
 
         self.textChat = Text(self.chatboxFrame, width=50, height=20, state=DISABLED, yscrollcommand=self.scrollBar.set, wrap=WORD)
@@ -392,7 +402,7 @@ class ClientWindow(Tk):
             self.updateTotalScore()
             self.highlightCurrentHole()
             msg = "!setscore " + self.entryUsername.get() + " " + self.myUUID + " " + str(self.getTotalScore()) + " " + str(self.getPartialParScore()) + " " \
-                  + str(self.currentHole - 1) + " " + str(self.scores[self.currentHole-2].get())
+                  + str(self.currentHole - 1) + " " + str(self.scores[self.currentHole - 2].get())
             self.client.send(msg)
 
     def clearMostRecentScore(self):
@@ -466,6 +476,12 @@ class ClientWindow(Tk):
 
     def onStartGame(self):
         CourseSelectWindow(self)
+
+    def onLeaderboardSlotsSelect(self, e):
+        for x in range(2, 2 + self.leaderboardSlots.get()):
+            self.canvas.itemconfig(x, state=NORMAL)
+        for x in range(2 + self.leaderboardSlots.get(), 18):
+            self.canvas.itemconfig(x, state=HIDDEN)
 
     def onEndGame(self):
         self.server.broadcast(bytes("!endgame", "utf8"))
