@@ -5,11 +5,12 @@ import time
 import uuid
 from socket import gethostbyname, gethostname
 from threading import Thread
-from tkinter import Tk, Frame, Text, NSEW, DISABLED, Label, EW, Button, GROOVE, CENTER, W, E, IntVar, Scrollbar, WORD, Entry, END, StringVar, NORMAL, Menu, Canvas, HIDDEN
+from tkinter import Tk, Frame, Text, NSEW, DISABLED, Label, EW, Button, GROOVE, CENTER, W, E, IntVar, Scrollbar, WORD, Entry, END, StringVar, NORMAL, Menu, Canvas, HIDDEN, Listbox
 from tkinter.ttk import Combobox
 
 from PIL.ImageTk import PhotoImage
 
+from aboutWindow import AboutWindow
 from client import Client
 from course import Course
 from courseSelectWindow import CourseSelectWindow
@@ -42,7 +43,10 @@ class ClientWindow(Tk):
         self.menubar = Menu(self)
         self.fileMenu = Menu(self.menubar, tearoff=0, takefocus=0)
         self.fileMenu.add_command(label="Quit", command=lambda: self.exit())
+        self.helpMenu = Menu(self.menubar, tearoff=0, takefocus=0)
+        self.helpMenu.add_command(label="About", command=lambda: AboutWindow(self))
         self.menubar.add_cascade(label="File", menu=self.fileMenu)
+        self.menubar.add_cascade(label="Help", menu=self.helpMenu)
         self.config(menu=self.menubar)
 
         self.myChatLine = StringVar()
@@ -130,20 +134,27 @@ class ClientWindow(Tk):
         self.totalScore = StringVar()
         self.totalScore.set("0")
 
-        self.hostOrJoinFrame = Frame(self.wholeWindowFrame, bd=2, relief=GROOVE)
-        self.labelHostOrJoinFrame = Label(self.hostOrJoinFrame, text="Lobby Options")
-        self.labelHostOrJoinFrame.grid(row=0, padx=4, pady=4, sticky=EW)
-        self.buttonHost = Button(self.hostOrJoinFrame, text="Host Lobby", command=self.onHostLobby)
-        self.buttonHost.grid(row=1, padx=4, pady=4, sticky=EW)
-        self.buttonJoin = Button(self.hostOrJoinFrame, text="Join Lobby", command=lambda: self.joinLobby())
-        self.buttonJoin.grid(row=2, padx=4, pady=4, sticky=EW)
-        self.buttonLeave = Button(self.hostOrJoinFrame, text="Leave Lobby", state=DISABLED, command=lambda: self.client.send("!quit"))
-        self.buttonLeave.grid(row=3, padx=4, pady=4, sticky=EW)
-        self.buttonStartGame = Button(self.hostOrJoinFrame, text="Start Game", state=DISABLED, command=self.onStartGame)
-        self.buttonStartGame.grid(row=4, padx=4, pady=4, sticky=EW)
-        self.buttonEndGame = Button(self.hostOrJoinFrame, text="End Game", state=DISABLED, command=self.onEndGame)
-        self.buttonEndGame.grid(row=5, padx=4, pady=4, sticky=EW)
-        self.hostOrJoinFrame.grid(row=0, column=1, padx=4, pady=4, sticky=NSEW)
+        self.sidebarFrame = Frame(self.wholeWindowFrame, bd=2, relief=GROOVE)
+        self.labelLobbyOptions = Label(self.sidebarFrame, text="Lobby Options")
+        self.labelLobbyOptions.grid(row=0, column=0, columnspan=2, padx=4, pady=4, sticky=W)
+        self.buttonHost = Button(self.sidebarFrame, text="Host Lobby", command=self.onHostLobby)
+        self.buttonHost.grid(row=1, column=0, columnspan=2, padx=4, pady=4, sticky=EW)
+        self.buttonJoin = Button(self.sidebarFrame, text="Join Lobby", command=lambda: self.joinLobby())
+        self.buttonJoin.grid(row=2, column=0, columnspan=2, padx=4, pady=4, sticky=EW)
+        self.buttonLeave = Button(self.sidebarFrame, text="Leave Lobby", state=DISABLED, command=lambda: self.client.send("!quit"))
+        self.buttonLeave.grid(row=3, column=0, columnspan=2, padx=4, pady=4, sticky=EW)
+        self.buttonStartGame = Button(self.sidebarFrame, text="Start Game", state=DISABLED, command=self.onStartGame)
+        self.buttonStartGame.grid(row=4, column=0, columnspan=2, padx=4, pady=4, sticky=EW)
+        self.buttonEndGame = Button(self.sidebarFrame, text="End Game", state=DISABLED, command=self.onEndGame)
+        self.buttonEndGame.grid(row=5, column=0, columnspan=2, padx=4, pady=4, sticky=EW)
+        self.labelPlayers = Label(self.sidebarFrame, text="Players")
+        self.labelPlayers.grid(row=6, column=0, columnspan=2, padx=4, pady=(4,0), sticky=W)
+        self.scrollBarPlayers = Scrollbar(self.sidebarFrame)
+        self.listboxPlayers = Listbox(self.sidebarFrame, height=15, yscrollcommand=self.scrollBarPlayers.set)
+        self.listboxPlayers.grid(row=7, column=0, padx=(4,0), pady=(0,4), sticky=EW)
+        self.scrollBarPlayers.configure(command=self.listboxPlayers.yview)
+        self.scrollBarPlayers.grid(row=7, column=1, padx=(0, 4), pady=4, sticky='nsw')
+        self.sidebarFrame.grid(row=0, column=1, padx=4, pady=4, sticky=NSEW)
 
         self.scoreFrame = Frame(self.wholeWindowFrame, bd=2, relief=GROOVE)
         self.labelHole = Label(self.scoreFrame, text="Hole:")
@@ -352,6 +363,12 @@ class ClientWindow(Tk):
                 previousPlayer = player
             time.sleep(5)
             self.canvas.delete("text")
+        if not sortedPlayerListChunks:
+            time.sleep(5)
+
+    def setPlayerListbox(self, playerList):
+        self.listboxPlayers.delete(0, END)
+        self.listboxPlayers.insert(END, sorted(playerList))
 
     def splitListIntoChunks(self, lst, chunkSize):
         result = []

@@ -17,12 +17,12 @@ class CourseSelectWindow:
         self.labelCourseOptions.grid(row=0, padx=4, pady=4, sticky=EW)
         self.labelGame = Label(self.courseFrame, text="Game:")
         self.labelGame.grid(row=1, padx=4, pady=4, sticky=W)
-        self.comboboxGame = Combobox(self.courseFrame, values=self.parent.gamesList, state="readonly")
+        self.comboboxGame = Combobox(self.courseFrame, values=self.parent.gamesList, width=40, state="readonly")
         self.comboboxGame.grid(row=2, padx=4, pady=4, sticky=W)
         self.comboboxGame.bind("<<ComboboxSelected>>", self.onGameSelect)
         self.labelCourse = Label(self.courseFrame, text="Course:")
         self.labelCourse.grid(row=3, padx=4, pady=4, sticky=W)
-        self.comboboxCourse = Combobox(self.courseFrame, values=self.parent.courseList, state="readonly")
+        self.comboboxCourse = Combobox(self.courseFrame, values=self.parent.courseList, width=40, state="readonly")
         self.comboboxCourse.grid(row=4, padx=4, pady=4, sticky=W)
         self.comboboxCourse.bind("<<ComboboxSelected>>", self.onCourseSelect)
         self.courseFrame.grid(row=0, padx=4, pady=4, sticky=NSEW)
@@ -43,6 +43,7 @@ class CourseSelectWindow:
             self.parent.courseList = [x.name for x in game[0].courses]
             self.comboboxCourse.configure(values=self.parent.courseList)
         self.parent.server.broadcast(bytes("!setgame " + self.comboboxGame.get(), "utf8"))
+        self.comboboxCourse.set("")
 
     def onCourseSelect(self, e):
         self.parent.server.broadcast(bytes("!setcourse \"" + self.comboboxCourse.get() + "\" " + self.lookupCoursePars(self.comboboxGame.get(), self.comboboxCourse.get()), "utf8"))

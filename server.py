@@ -40,6 +40,7 @@ class Server:
         msg = "<System> %s connected." % name
         self.broadcast(bytes(msg, "utf8"))
         self.clients[client] = name
+        self.broadcast(bytes("!setplayers %s" % self.getSpaceDelineatedListOfConnectedPlayers(), "utf8"))
 
         while True:
             msg = client.recv(self.bufferSize)
@@ -53,6 +54,7 @@ class Server:
                 self.broadcast(bytes(msg))
             else:
                 self.broadcast(msg, "<" + name + "> ")
+            self.broadcast(bytes("!setplayers %s" % self.getSpaceDelineatedListOfConnectedPlayers(), "utf8"))
 
     def broadcast(self, msg, prefix=""):
         print(prefix + str(msg.decode("utf-8")))
@@ -63,3 +65,9 @@ class Server:
         for client in self.clients:
             client.close()
             del self.clients[client]
+
+    def getSpaceDelineatedListOfConnectedPlayers(self):
+        result = ""
+        for name in self.clients.values():
+            result += name + " "
+        return result.rstrip()

@@ -37,6 +37,8 @@ class Client:
                     self.clientWindow.resetGame()
                 elif msg.startswith("!setscore"):
                     self.clientWindow.updatePlayerScore(msg)
+                elif msg.startswith("!setplayers"):
+                    self.clientWindow.setPlayerListbox(msg[11:].split())
                 elif msg.startswith("!quit"):
                     pass
                 else:
