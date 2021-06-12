@@ -563,6 +563,9 @@ class ClientWindow(Tk):
         self.entryChat.configure(state=DISABLED)
         self.buttonChat.configure(state=DISABLED)
         self.entryUsername.configure(state=NORMAL)
+        self.players = []
+        self.setPlayerListbox([])
+        self.removeAllHoleHighlights()
 
     def setStateOfAllScoreButtons(self, newState):
         self.buttonHoleInOne.configure(state=newState)
@@ -583,10 +586,13 @@ class ClientWindow(Tk):
         self.buttonClearMostRecentHole.configure(state=newState)
 
     def highlightCurrentHole(self):
-        for hole in self.holeLabels:
-            hole.configure(background="SystemButtonFace")
+        self.removeAllHoleHighlights()
         if 0 < self.currentHole < 19:
             self.holeLabels[self.currentHole - 1].configure(background="#00ff00")
+
+    def removeAllHoleHighlights(self):
+        for hole in self.holeLabels:
+            hole.configure(background="SystemButtonFace")
 
     def exit(self):
         if self.client:
