@@ -47,7 +47,13 @@ class Client:
                 break
 
     def send(self, msg):
-        self.clientSocket.send(bytes(msg, "utf8"))
+        try:
+            self.clientSocket.send(bytes(msg, "utf8"))
+        except ConnectionResetError:
+            self.clientWindow.resetGame()
+            self.clientWindow.resetOnLogoff()
+            self.clientSocket.close()
+            self.clientWindow.addText("<System> The lobby was closed by the host.")
         if msg == "!quit":
             self.clientWindow.resetGame()
             self.clientWindow.resetOnLogoff()

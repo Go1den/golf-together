@@ -48,7 +48,6 @@ class Server:
                 client.close()
                 del self.clients[client]
                 self.broadcast(bytes("<System> %s disconnected." % name, "utf8"))
-                print("Number of clients is now: " + str(len(self.clients)))
                 break
             elif msg == bytes("!startgame", "utf8") or msg == bytes("!endgame", "utf8") or msg.startswith(bytes("!setscore", "utf8")):
                 self.broadcast(bytes(msg))
@@ -64,7 +63,7 @@ class Server:
     def closeAllConnections(self):
         for client in self.clients:
             client.close()
-            del self.clients[client]
+        self.clients = {}
 
     def getSpaceDelineatedListOfConnectedPlayers(self):
         result = ""
