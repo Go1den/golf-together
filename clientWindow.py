@@ -368,9 +368,8 @@ class ClientWindow(Tk):
             time.sleep(5)
 
     def setPlayerListbox(self, playerList):
-        # index = 1
         self.listboxPlayers.delete(0, END)
-        for player in sorted(playerList):
+        for player in sorted(playerList, key=lambda x: x.upper()):
             self.listboxPlayers.insert(END, player + "\n")
 
     def splitListIntoChunks(self, lst, chunkSize):
