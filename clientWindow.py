@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import uuid
+from copy import deepcopy
 from socket import gethostbyname, gethostname
 from threading import Thread
 from tkinter import Tk, Frame, Text, NSEW, DISABLED, Label, EW, Button, GROOVE, CENTER, W, E, IntVar, Scrollbar, WORD, Entry, END, StringVar, NORMAL, Menu, Canvas, HIDDEN, Listbox
@@ -344,7 +345,7 @@ class ClientWindow(Tk):
             self.drawLeaderboard()
 
     def drawLeaderboard(self):
-        sortedPlayerList = sorted(self.players, key=lambda x: (x.score - x.parThroughCurrentHole, x.currentHole))
+        sortedPlayerList = sorted(deepcopy(self.players), key=lambda x: (x.score - x.parThroughCurrentHole, x.currentHole))
         sortedPlayerListChunks = self.splitListIntoChunks(sortedPlayerList, self.leaderboardSlots.get())
         place = 1
         idx = 1
@@ -367,8 +368,10 @@ class ClientWindow(Tk):
             time.sleep(5)
 
     def setPlayerListbox(self, playerList):
+        # index = 1
         self.listboxPlayers.delete(0, END)
-        self.listboxPlayers.insert(END, sorted(playerList))
+        for player in sorted(playerList):
+            self.listboxPlayers.insert(END, player + "\n")
 
     def splitListIntoChunks(self, lst, chunkSize):
         result = []
