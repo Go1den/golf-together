@@ -1,0 +1,9 @@
+{
+    "game": "Golf (NES)",
+    "courses": [
+        {
+            "name": "1 Player Stroke Play",
+            "parList": [4, 4, 3, 4, 5, 4, 4, 5, 3, 4, 3, 4, 5, 3, 4, 4, 4, 5]
+        }
+    ]
+}
