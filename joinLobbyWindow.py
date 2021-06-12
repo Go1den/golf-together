@@ -45,7 +45,5 @@ class JoinLobbyWindow:
             return
         self.parent.isHost = False
         self.parent.toggleChat()
-        self.parent.toggleGameButtons()
         self.parent.toggleLobby()
-        self.parent.toggleCourseButtons()
         self.window.destroy()
