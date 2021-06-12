@@ -17,7 +17,7 @@ class CourseSelectWindow:
         self.labelCourseOptions.grid(row=0, padx=4, pady=4, sticky=EW)
         self.labelGame = Label(self.courseFrame, text="Game:")
         self.labelGame.grid(row=1, padx=4, pady=4, sticky=W)
-        self.comboboxGame = Combobox(self.courseFrame, values=self.parent.gamesList, width=40, state="readonly")
+        self.comboboxGame = Combobox(self.courseFrame, values=sorted(self.parent.gamesList, key=lambda x: x.upper()), width=40, state="readonly")
         self.comboboxGame.grid(row=2, padx=4, pady=4, sticky=W)
         self.comboboxGame.bind("<<ComboboxSelected>>", self.onGameSelect)
         self.labelCourse = Label(self.courseFrame, text="Course:")
