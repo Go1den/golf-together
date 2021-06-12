@@ -43,13 +43,7 @@ class Server:
         self.broadcast(bytes("!setplayers %s" % self.getSpaceDelineatedListOfConnectedPlayers(), "utf8"))
 
         while True:
-            try:
-                msg = client.recv(self.bufferSize)
-            except ConnectionAbortedError:
-                client.close()
-                del self.clients[client]
-                self.broadcast(bytes("<System> The lobby was closed by the host." % name, "utf8"))
-                break
+            msg = client.recv(self.bufferSize)
             if msg == bytes("!quit", "utf8"):
                 client.close()
                 del self.clients[client]
