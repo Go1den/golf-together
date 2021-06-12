@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import uuid
+import webbrowser
 from copy import deepcopy
 from socket import gethostbyname, gethostname
 from threading import Thread
@@ -44,9 +45,14 @@ class ClientWindow(Tk):
         self.menubar = Menu(self)
         self.fileMenu = Menu(self.menubar, tearoff=0, takefocus=0)
         self.fileMenu.add_command(label="Quit", command=lambda: self.exit())
+        self.courseMenu = Menu(self.menubar, tearoff=0, takefocus=0)
+        self.courseMenu.add_command(label="Download Course Data", command=lambda: webbrowser.open('https://github.com/Go1den/golf-together/discussions/categories/course-data', new=2))
+        self.courseMenu.add_command(label="Upload Course Data", command=lambda: webbrowser.open('https://github.com/Go1den/golf-together/discussions/6', new=2))
         self.helpMenu = Menu(self.menubar, tearoff=0, takefocus=0)
+        self.helpMenu.add_command(label="Report Issue", command=lambda: webbrowser.open('https://github.com/Go1den/golf-together/issues', new=2))
         self.helpMenu.add_command(label="About", command=lambda: AboutWindow(self))
         self.menubar.add_cascade(label="File", menu=self.fileMenu)
+        self.menubar.add_cascade(label="Course Data", menu=self.courseMenu)
         self.menubar.add_cascade(label="Help", menu=self.helpMenu)
         self.config(menu=self.menubar)
 
