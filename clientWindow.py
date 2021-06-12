@@ -551,9 +551,9 @@ class ClientWindow(Tk):
         if self.server:
             self.server.closeAllConnections()
             self.server.server.close()
-            self.client = None
-            self.server = None
-            self.isHost = False
+        self.server = None
+        self.isHost = False
+        self.client = None
         self.buttonHost.configure(state=NORMAL)
         self.buttonJoin.configure(state=NORMAL)
         self.buttonLeave.configure(state=DISABLED)
