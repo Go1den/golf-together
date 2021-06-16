@@ -55,6 +55,7 @@ class CourseSelectWindow:
             self.parent.server.broadcast(bytes(START_GAME + MESSAGE_SUFFIX, "utf8"))
             self.parent.buttonStartGame.configure(state=DISABLED)
             self.parent.buttonEndGame.configure(state=NORMAL)
+            self.parent.scoreUpdated = True
             self.window.destroy()
         else:
             messagebox.showerror("Error", "You must select a game and course.", parent=self.window)
