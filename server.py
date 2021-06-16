@@ -1,6 +1,8 @@
 from socket import AF_INET, socket, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
 from threading import Thread
 
+from messageConstants import MESSAGE_SUFFIX, SET_PLAYERS, SYSTEM, QUIT, START_GAME, END_GAME, SET_SCORE
+
 class Server:
     def __init__(self, host: str = '', port: int = 33000, bufferSize: int = 1024, backlog: int = 128, clientWindow=None):
         self.host = host
@@ -34,26 +36,34 @@ class Server:
             self.shutdownServer()
 
     def handleClient(self, client):
-        name = client.recv(self.bufferSize).decode("utf8")
-        welcome = "<System> Welcome %s! Type !quit at any time to exit." % name
+        name = client.recv(self.bufferSize).decode("utf8").split(MESSAGE_SUFFIX)[0]
+        welcome = SYSTEM + " Welcome, " + name + "! Type !quit at any time to exit." + MESSAGE_SUFFIX
         client.send(bytes(welcome, "utf8"))
-        msg = "<System> %s connected." % name
+        msg = SYSTEM + " " + name + " connected." + MESSAGE_SUFFIX
         self.broadcast(bytes(msg, "utf8"))
         self.clients[client] = name
-        self.broadcast(bytes("!setplayers %s" % self.getSpaceDelineatedListOfConnectedPlayers(), "utf8"))
+        self.setPlayersMessage()
+        buffer = ""
 
         while True:
-            msg = client.recv(self.bufferSize)
-            if msg == bytes("!quit", "utf8"):
-                client.close()
-                del self.clients[client]
-                self.broadcast(bytes("<System> %s disconnected." % name, "utf8"))
-                break
-            elif msg == bytes("!startgame", "utf8") or msg == bytes("!endgame", "utf8") or msg.startswith(bytes("!setscore", "utf8")):
-                self.broadcast(bytes(msg))
-            else:
-                self.broadcast(msg, "<" + name + "> ")
-            self.broadcast(bytes("!setplayers %s" % self.getSpaceDelineatedListOfConnectedPlayers(), "utf8"))
+            buffer += client.recv(self.bufferSize).decode("utf8")
+            while MESSAGE_SUFFIX in buffer:
+                msg, buffer = buffer.split(MESSAGE_SUFFIX, 1)
+                if msg == QUIT:
+                    client.close()
+                    del self.clients[client]
+                    disconnectMsg = SYSTEM + " " + name + " disconnected." + MESSAGE_SUFFIX
+                    self.broadcast(bytes(disconnectMsg, "utf8"))
+                    break
+                elif msg == START_GAME or msg == END_GAME or msg.startswith(SET_SCORE):
+                    self.broadcast(bytes(msg + MESSAGE_SUFFIX, "utf8"))
+                else:
+                    self.broadcast(bytes(msg + MESSAGE_SUFFIX, "utf8"), "<" + name + "> ")
+                self.setPlayersMessage()
+
+    def setPlayersMessage(self):
+        setPlayersMsg = SET_PLAYERS + " " + self.getSpaceDelineatedListOfConnectedPlayers() + MESSAGE_SUFFIX
+        self.broadcast(bytes(setPlayersMsg, "utf8"))
 
     def broadcast(self, msg, prefix=""):
         print(prefix + str(msg.decode("utf-8")))

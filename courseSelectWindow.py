@@ -1,5 +1,7 @@
-from tkinter import Toplevel, Frame, Label, EW, GROOVE, DISABLED, W, NSEW, Button, SE, NORMAL
+from tkinter import Toplevel, Frame, Label, EW, GROOVE, DISABLED, W, NSEW, Button, SE, NORMAL, messagebox
 from tkinter.ttk import Combobox
+
+from messageConstants import MESSAGE_SUFFIX, START_GAME
 
 class CourseSelectWindow:
     def __init__(self, parent):
@@ -42,17 +44,20 @@ class CourseSelectWindow:
         if game:
             self.parent.courseList = [x.name for x in game[0].courses]
             self.comboboxCourse.configure(values=self.parent.courseList)
-        self.parent.server.broadcast(bytes("!setgame " + self.comboboxGame.get(), "utf8"))
+        self.parent.server.broadcast(bytes("!setgame " + self.comboboxGame.get() + MESSAGE_SUFFIX, "utf8"))
         self.comboboxCourse.set("")
 
     def onCourseSelect(self, e):
-        self.parent.server.broadcast(bytes("!setcourse \"" + self.comboboxCourse.get() + "\" " + self.lookupCoursePars(self.comboboxGame.get(), self.comboboxCourse.get()), "utf8"))
+        self.parent.server.broadcast(bytes("!setcourse \"" + self.comboboxCourse.get() + "\" " + self.lookupCoursePars(self.comboboxGame.get(), self.comboboxCourse.get()) + MESSAGE_SUFFIX, "utf8"))
 
     def onOk(self):
-        self.parent.server.broadcast(bytes("!startgame", "utf8"))
-        self.parent.buttonStartGame.configure(state=DISABLED)
-        self.parent.buttonEndGame.configure(state=NORMAL)
-        self.window.destroy()
+        if self.comboboxCourse.get() and self.comboboxGame.get():
+            self.parent.server.broadcast(bytes(START_GAME + MESSAGE_SUFFIX, "utf8"))
+            self.parent.buttonStartGame.configure(state=DISABLED)
+            self.parent.buttonEndGame.configure(state=NORMAL)
+            self.window.destroy()
+        else:
+            messagebox.showerror("Error", "You must select a game and course.", parent=self.window)
 
     def lookupCoursePars(self, selectedGame, selectedCourse):
         game = next(g for g in self.parent.games if g.name == selectedGame)

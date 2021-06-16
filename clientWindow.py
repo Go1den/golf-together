@@ -19,6 +19,7 @@ from courseSelectWindow import CourseSelectWindow
 from game import Game
 from hostWindow import HostWindow
 from joinLobbyWindow import JoinLobbyWindow
+from messageConstants import MESSAGE_SUFFIX, QUIT, START_GAME, SET_COURSE, END_GAME, SET_GAME
 from player import Player
 from server import Server
 from validateUsername import validateUsername
@@ -50,6 +51,8 @@ class ClientWindow(Tk):
         self.courseMenu.add_command(label="Upload Course Data", command=lambda: webbrowser.open('https://github.com/Go1den/golf-together/discussions/6', new=2))
         self.helpMenu = Menu(self.menubar, tearoff=0, takefocus=0)
         self.helpMenu.add_command(label="Report Issue", command=lambda: webbrowser.open('https://github.com/Go1den/golf-together/issues', new=2))
+        self.helpMenu.add_command(label="How to Host", command=lambda: webbrowser.open('https://github.com/Go1den/golf-together/wiki/How-to-host-a-lobby-(additional-setup-required)', new=2))
+        self.helpMenu.add_command(label="What is my IP", command=lambda: webbrowser.open('https://www.whatismyip.com/)', new=2))
         self.helpMenu.add_command(label="About", command=lambda: AboutWindow(self))
         self.menubar.add_cascade(label="File", menu=self.fileMenu)
         self.menubar.add_cascade(label="Course Data", menu=self.courseMenu)
@@ -148,7 +151,7 @@ class ClientWindow(Tk):
         self.buttonHost.grid(row=1, column=0, columnspan=2, padx=4, pady=4, sticky=EW)
         self.buttonJoin = Button(self.sidebarFrame, text="Join Lobby", command=lambda: self.joinLobby())
         self.buttonJoin.grid(row=2, column=0, columnspan=2, padx=4, pady=4, sticky=EW)
-        self.buttonLeave = Button(self.sidebarFrame, text="Leave Lobby", state=DISABLED, command=lambda: self.client.send("!quit"))
+        self.buttonLeave = Button(self.sidebarFrame, text="Leave Lobby", state=DISABLED, command=lambda: self.client.send(QUIT))
         self.buttonLeave.grid(row=3, column=0, columnspan=2, padx=4, pady=4, sticky=EW)
         self.buttonStartGame = Button(self.sidebarFrame, text="Start Game", state=DISABLED, command=self.onStartGame)
         self.buttonStartGame.grid(row=4, column=0, columnspan=2, padx=4, pady=4, sticky=EW)
@@ -412,9 +415,9 @@ class ClientWindow(Tk):
 
     def sendChatMessage(self):
         if self.client and self.myChatLine.get():
-            if not self.myChatLine.get().startswith("!startgame") and not self.myChatLine.get().startswith("!endgame") \
-                    and not self.myChatLine.get().startswith("!setcourse") and not self.myChatLine.get().startswith("!setgame"):
-                self.client.send(self.myChatLine.get())
+            if not self.myChatLine.get().startswith(START_GAME) and not self.myChatLine.get().startswith(END_GAME) \
+                    and not self.myChatLine.get().startswith(SET_COURSE) and not self.myChatLine.get().startswith(SET_GAME):
+                self.client.send(self.myChatLine.get().replace(MESSAGE_SUFFIX, "")[0:160])
             self.myChatLine.set("")
             self.entryChat.focus_set()
 
@@ -468,11 +471,6 @@ class ClientWindow(Tk):
             player.setRelativeScore()
         if len(splitMsg) == 7:
             self.addText("<System> " + splitMsg[1] + " scored " + splitMsg[6] + " on hole " + splitMsg[5])
-        self.printAllPlayerInfo()
-
-    def printAllPlayerInfo(self):
-        for p in self.players:
-            p.print()
 
     def setPars(self, pars):
         idx = 0
@@ -525,9 +523,10 @@ class ClientWindow(Tk):
             self.canvas.itemconfig(x, state=HIDDEN)
 
     def onEndGame(self):
-        self.server.broadcast(bytes("!endgame", "utf8"))
+        self.server.broadcast(bytes(END_GAME + MESSAGE_SUFFIX, "utf8"))
         self.buttonStartGame.configure(state=NORMAL)
         self.buttonEndGame.configure(state=DISABLED)
+        self.courseList = []
 
     def getGames(self) -> list[Game]:
         games = []
@@ -571,6 +570,7 @@ class ClientWindow(Tk):
         self.players = []
         self.setPlayerListbox([])
         self.removeAllHoleHighlights()
+        self.courseList = []
 
     def setStateOfAllScoreButtons(self, newState):
         self.buttonHoleInOne.configure(state=newState)
