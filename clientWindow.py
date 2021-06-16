@@ -4,10 +4,12 @@ import sys
 import time
 import uuid
 import webbrowser
+from ast import literal_eval
 from copy import deepcopy
 from socket import gethostbyname, gethostname
 from threading import Thread
-from tkinter import Tk, Frame, Text, NSEW, DISABLED, Label, EW, Button, GROOVE, CENTER, W, E, IntVar, Scrollbar, WORD, Entry, END, StringVar, NORMAL, Menu, Canvas, HIDDEN, Listbox
+from tkinter import Tk, Frame, Text, NSEW, DISABLED, Label, EW, Button, GROOVE, CENTER, W, E, IntVar, Scrollbar, WORD, Entry, END, StringVar, NORMAL, Menu, Canvas, HIDDEN, Listbox, \
+    colorchooser, messagebox
 from tkinter.ttk import Combobox
 
 from PIL.ImageTk import PhotoImage
@@ -33,6 +35,7 @@ class ClientWindow(Tk):
         self.iconbitmap('golfTogether.ico')
         self.protocol("WM_DELETE_WINDOW", lambda: self.exit())
 
+        self.settings = self.readSettings()
         self.games = self.getGames()
         self.gamesList = [x.name for x in self.games]
         self.courseList = []
@@ -45,7 +48,15 @@ class ClientWindow(Tk):
 
         self.menubar = Menu(self)
         self.fileMenu = Menu(self.menubar, tearoff=0, takefocus=0)
+        self.fileMenu.add_command(label="Save Settings", command=lambda: self.saveSettings())
         self.fileMenu.add_command(label="Quit", command=lambda: self.exit())
+
+        self.colorsMenu = Menu(self.menubar, tearoff=0, takefocus=0)
+        self.colorsMenu.add_command(label="Primary Text...", command=lambda: self.updateColors("primaryText"))
+        self.colorsMenu.add_command(label="Secondary Text...", command=lambda: self.updateColors("secondaryText"))
+        self.colorsMenu.add_separator()
+        self.colorsMenu.add_command(label="Primary Background...", command=lambda: self.updateColors("primaryRectangle"))
+        self.colorsMenu.add_command(label="Secondary Background...", command=lambda: self.updateColors("secondaryRectangle"))
         self.courseMenu = Menu(self.menubar, tearoff=0, takefocus=0)
         self.courseMenu.add_command(label="Download Course Data", command=lambda: webbrowser.open('https://github.com/Go1den/golf-together/discussions/categories/course-data', new=2))
         self.courseMenu.add_command(label="Upload Course Data", command=lambda: webbrowser.open('https://github.com/Go1den/golf-together/discussions/6', new=2))
@@ -55,11 +66,14 @@ class ClientWindow(Tk):
         self.helpMenu.add_command(label="What is my IP", command=lambda: webbrowser.open('https://www.whatismyip.com/)', new=2))
         self.helpMenu.add_command(label="About", command=lambda: AboutWindow(self))
         self.menubar.add_cascade(label="File", menu=self.fileMenu)
+        self.menubar.add_cascade(label="Colors", menu=self.colorsMenu)
         self.menubar.add_cascade(label="Course Data", menu=self.courseMenu)
         self.menubar.add_cascade(label="Help", menu=self.helpMenu)
         self.config(menu=self.menubar)
 
         self.myChatLine = StringVar()
+        self.myUsername = StringVar()
+        self.myUsername.set(self.settings.get("username", ""))
 
         self.wholeWindowFrame = Frame()
 
@@ -67,12 +81,12 @@ class ClientWindow(Tk):
         self.chatboxFrame = Frame(self.chatFrame)
         self.scrollBar = Scrollbar(self.chatboxFrame)
         self.leaderboardSlots = IntVar()
-        self.leaderboardSlots.set(16)
+        self.leaderboardSlots.set(self.settings.get("leaderboardSlots", 16))
 
         self.chatUsernameFrame = Frame(self.chatFrame)
         self.labelUsername = Label(self.chatUsernameFrame, text="Username:")
         self.labelUsername.grid(row=0, column=0, padx=4, pady=4, sticky=W)
-        self.entryUsername = Entry(self.chatUsernameFrame, width=20)
+        self.entryUsername = Entry(self.chatUsernameFrame, width=20, textvariable=self.myUsername)
         self.entryUsername.grid(row=0, column=1, padx=4, pady=4, sticky=W)
         self.labelLeaderboardSlots = Label(self.chatUsernameFrame, text="Leaderboard Slots:")
         self.labelLeaderboardSlots.grid(row=0, column=2, padx=(20, 4), pady=4, sticky=W)
@@ -143,6 +157,7 @@ class ClientWindow(Tk):
         self.totalPar = IntVar()
         self.totalScore = StringVar()
         self.totalScore.set("0")
+        self.scoreUpdated = False
 
         self.sidebarFrame = Frame(self.wholeWindowFrame, bd=2, relief=GROOVE)
         self.labelLobbyOptions = Label(self.sidebarFrame, text="Lobby Options")
@@ -336,9 +351,11 @@ class ClientWindow(Tk):
         self.canvas.create_image(182, 24, image=self.topOfLeaderboardImage, tags="topOfLeaderboardImage")
         self.img2 = PhotoImage(file="images/leaderboard2.png")
 
-        y = 66
+        y = 46
         for x in range(16):
-            self.canvas.create_image(182, y, image=self.img2, tags="rectangle")
+            self.canvas.create_rectangle(4, y, 245, y+40, tags="primaryRectangle", fill=self.settings.get("primaryRectangle", "blue"), width=0)
+            self.canvas.create_rectangle(245, y, 297, y+40, tags="secondaryRectangle", fill=self.settings.get("secondaryRectangle", "white"), width=0)
+            self.canvas.create_rectangle(297, y, 360, y+40, tags="primaryRectangle", fill=self.settings.get("primaryRectangle", "blue"), width=0)
             y += 42
 
         self.canvasFrame.grid(row=0, rowspan=4, column=2, padx=4, pady=4, sticky=NSEW)
@@ -346,35 +363,60 @@ class ClientWindow(Tk):
 
         self.addText("<System> Welcome to Golf Together! To start, host or join a lobby.")
         self.thread = Thread(target=self.leaderboardLoop, daemon=True).start()
+        self.onLeaderboardSlotsSelect(None)
         self.deiconify()
         self.mainloop()
+
+    def readSettings(self):
+        with open('settings.cfg', 'r') as f:
+            s = f.read()
+            return literal_eval(s)
+
+    def saveSettings(self):
+        self.settings["username"] = self.myUsername.get()
+        self.settings["leaderboardSlots"] = self.leaderboardSlots.get()
+        with open('settings.cfg', 'w') as f:
+            f.write(json.dumps(self.settings, indent=4))
+        messagebox.showinfo("Info", "Settings saved.", parent=self)
+
+    def updateColors(self, key):
+        color = colorchooser.askcolor()
+        if color:
+            self.settings[key] = color[1]
+        for rect in self.canvas.find_withtag(key):
+            self.canvas.itemconfig(rect, fill=self.settings[key])
 
     def leaderboardLoop(self):
         while True:
             self.drawLeaderboard()
 
     def drawLeaderboard(self):
-        sortedPlayerList = sorted(deepcopy(self.players), key=lambda x: (x.score - x.parThroughCurrentHole, x.currentHole))
-        sortedPlayerListChunks = self.splitListIntoChunks(sortedPlayerList, self.leaderboardSlots.get())
-        place = 1
-        idx = 1
-        previousPlayer = None
-        for chunk in sortedPlayerListChunks:
-            y = 66
-            for player in chunk:
-                if not previousPlayer or previousPlayer.scoreAsString != player.scoreAsString:
-                    place = idx
-                self.canvas.create_text(38, y, text=place, fill="white", font=("Franklin Gothic Medium", 18), anchor=E, tags="text")
-                self.canvas.create_text(72, y, text=player.name, fill="white", font=("Franklin Gothic Medium", 18), anchor=W, tags="text")
-                self.canvas.create_text(270, y, text=player.scoreAsString, font=("Franklin Gothic Medium", 18), tags="text")
-                self.canvas.create_text(336, y, text=player.currentHole, fill="white", font=("Franklin Gothic Medium", 18), tags="text")
-                y += 42
-                idx += 1
-                previousPlayer = player
-            time.sleep(5)
-            self.canvas.delete("text")
-        if not sortedPlayerListChunks:
-            time.sleep(5)
+        if self.scoreUpdated:
+            self.scoreUpdated = False
+            sortedPlayerList = sorted(deepcopy(self.players), key=lambda x: (x.score - x.parThroughCurrentHole, x.currentHole))
+            sortedPlayerListChunks = self.splitListIntoChunks(sortedPlayerList, self.leaderboardSlots.get())
+            place = 1
+            idx = 1
+            previousPlayer = None
+            self.canvas.delete("primaryText")
+            self.canvas.delete("secondaryText")
+            for chunk in sortedPlayerListChunks:
+                y = 66
+                for player in chunk:
+                    if not previousPlayer or previousPlayer.scoreAsString != player.scoreAsString:
+                        place = idx
+                    self.canvas.create_text(38, y, text=place, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), anchor=E, tags="primaryText")
+                    self.canvas.create_text(72, y, text=player.name, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), anchor=W, tags="primaryText")
+                    self.canvas.create_text(270, y, text=player.scoreAsString, fill=self.settings.get("secondaryText", "black"), font=("Franklin Gothic Medium", 18), tags="secondaryText")
+                    self.canvas.create_text(336, y, text=player.currentHole, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), tags="primaryText")
+                    y += 42
+                    idx += 1
+                    previousPlayer = player
+                time.sleep(5)
+            if not sortedPlayerListChunks:
+                time.sleep(1)
+        else:
+            time.sleep(1)
 
     def setPlayerListbox(self, playerList):
         self.listboxPlayers.delete(0, END)
@@ -471,6 +513,7 @@ class ClientWindow(Tk):
             player.setRelativeScore()
         if len(splitMsg) == 7:
             self.addText("<System> " + splitMsg[1] + " scored " + splitMsg[6] + " on hole " + splitMsg[5])
+        self.scoreUpdated = True
 
     def setPars(self, pars):
         idx = 0
@@ -517,9 +560,9 @@ class ClientWindow(Tk):
         CourseSelectWindow(self)
 
     def onLeaderboardSlotsSelect(self, e):
-        for x in range(2, 2 + self.leaderboardSlots.get()):
+        for x in range(2, 2 + 3*(self.leaderboardSlots.get())):
             self.canvas.itemconfig(x, state=NORMAL)
-        for x in range(2 + self.leaderboardSlots.get(), 18):
+        for x in range(2 + 3*(self.leaderboardSlots.get()), 50):
             self.canvas.itemconfig(x, state=HIDDEN)
 
     def onEndGame(self):
