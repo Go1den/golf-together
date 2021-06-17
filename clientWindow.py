@@ -566,6 +566,7 @@ class ClientWindow(Tk):
             self.canvas.itemconfig(x, state=NORMAL)
         for x in range(2 + 2*(self.leaderboardSlots.get()), 34):
             self.canvas.itemconfig(x, state=HIDDEN)
+        self.scoreUpdated = True
 
     def onEndGame(self):
         self.server.broadcast(bytes(END_GAME + MESSAGE_SUFFIX, "utf8"))
