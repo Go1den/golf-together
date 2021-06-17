@@ -57,6 +57,7 @@ class ClientWindow(Tk):
         self.colorsMenu.add_separator()
         self.colorsMenu.add_command(label="Primary Background...", command=lambda: self.updateColors("primaryRectangle"))
         self.colorsMenu.add_command(label="Secondary Background...", command=lambda: self.updateColors("secondaryRectangle"))
+        self.colorsMenu.add_command(label="Border...", command=lambda: self.updateColors("border"))
         self.courseMenu = Menu(self.menubar, tearoff=0, takefocus=0)
         self.courseMenu.add_command(label="Download Course Data", command=lambda: webbrowser.open('https://github.com/Go1den/golf-together/discussions/categories/course-data', new=2))
         self.courseMenu.add_command(label="Upload Course Data", command=lambda: webbrowser.open('https://github.com/Go1den/golf-together/discussions/6', new=2))
@@ -344,7 +345,7 @@ class ClientWindow(Tk):
         self.scoreInputFrame.grid(row=3, column=0, columnspan=2, padx=4, pady=4, sticky=NSEW)
 
         self.canvasFrame = Frame(self.wholeWindowFrame)
-        self.canvas = Canvas(self.canvasFrame, bg="#00ff00", width=361, height=717)
+        self.canvas = Canvas(self.canvasFrame, bg=self.settings.get("border", "#00ff00"), width=316, height=717)
         self.canvas.grid(row=0, column=0, sticky=NSEW)
 
         self.topOfLeaderboardImage = PhotoImage(file="images/leaderboard.png")
@@ -353,15 +354,15 @@ class ClientWindow(Tk):
 
         y = 46
         for x in range(16):
-            self.canvas.create_rectangle(4, y, 245, y+40, tags="primaryRectangle", fill=self.settings.get("primaryRectangle", "blue"), width=0)
-            self.canvas.create_rectangle(245, y, 297, y+40, tags="secondaryRectangle", fill=self.settings.get("secondaryRectangle", "white"), width=0)
-            self.canvas.create_rectangle(297, y, 360, y+40, tags="primaryRectangle", fill=self.settings.get("primaryRectangle", "blue"), width=0)
+            self.canvas.create_rectangle(4, y, 215, y+40, tags="primaryRectangle", fill=self.settings.get("primaryRectangle", "blue"), width=0)
+            self.canvas.create_rectangle(215, y, 267, y+40, tags="secondaryRectangle", fill=self.settings.get("secondaryRectangle", "white"), width=0)
+            self.canvas.create_rectangle(267, y, 315, y+40, tags="primaryRectangle", fill=self.settings.get("primaryRectangle", "blue"), width=0)
             y += 42
 
         self.canvasFrame.grid(row=0, rowspan=4, column=2, padx=4, pady=4, sticky=NSEW)
         self.wholeWindowFrame.grid()
 
-        self.addText("<System> Welcome to Golf Together! To start, host or join a lobby.")
+        self.addText("<System> Welcome to Golf Together! To start, enter your username, then host or join a lobby.")
         self.thread = Thread(target=self.leaderboardLoop, daemon=True).start()
         self.onLeaderboardSlotsSelect(None)
         self.deiconify()
@@ -383,8 +384,11 @@ class ClientWindow(Tk):
         color = colorchooser.askcolor()
         if color:
             self.settings[key] = color[1]
-        for rect in self.canvas.find_withtag(key):
-            self.canvas.itemconfig(rect, fill=self.settings[key])
+        if key == "border":
+            self.canvas.configure(bg=self.settings[key])
+        else:
+            for rect in self.canvas.find_withtag(key):
+                self.canvas.itemconfig(rect, fill=self.settings[key])
 
     def leaderboardLoop(self):
         while True:
@@ -405,10 +409,10 @@ class ClientWindow(Tk):
                 for player in chunk:
                     if not previousPlayer or previousPlayer.scoreAsString != player.scoreAsString:
                         place = idx
-                    self.canvas.create_text(38, y, text=place, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), anchor=E, tags="primaryText")
-                    self.canvas.create_text(72, y, text=player.name, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), anchor=W, tags="primaryText")
-                    self.canvas.create_text(270, y, text=player.scoreAsString, fill=self.settings.get("secondaryText", "black"), font=("Franklin Gothic Medium", 18), tags="secondaryText")
-                    self.canvas.create_text(336, y, text=player.currentHole, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), tags="primaryText")
+                    self.canvas.create_text(26, y, text=place, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), tags="primaryText")
+                    self.canvas.create_text(48, y, text=player.name, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), anchor=W, tags="primaryText")
+                    self.canvas.create_text(240, y, text=player.scoreAsString, fill=self.settings.get("secondaryText", "black"), font=("Franklin Gothic Medium", 18), tags="secondaryText")
+                    self.canvas.create_text(292, y, text=player.currentHole, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), tags="primaryText")
                     y += 42
                     idx += 1
                     previousPlayer = player
