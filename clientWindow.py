@@ -400,9 +400,9 @@ class ClientWindow(Tk):
             place = 1
             idx = 1
             previousPlayer = None
-            self.canvas.delete("primaryText")
-            self.canvas.delete("secondaryText")
             for chunk in sortedPlayerListChunks:
+                self.canvas.delete("primaryText")
+                self.canvas.delete("secondaryText")
                 y = 67
                 for player in chunk:
                     if not previousPlayer or previousPlayer.scoreAsString != player.scoreAsString:
@@ -417,6 +417,9 @@ class ClientWindow(Tk):
                 time.sleep(5)
             if not sortedPlayerListChunks:
                 time.sleep(1)
+            else:
+                if len(sortedPlayerListChunks) > 1:
+                    self.scoreUpdated = True
         else:
             time.sleep(1)
 
