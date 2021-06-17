@@ -345,18 +345,16 @@ class ClientWindow(Tk):
         self.scoreInputFrame.grid(row=3, column=0, columnspan=2, padx=4, pady=4, sticky=NSEW)
 
         self.canvasFrame = Frame(self.wholeWindowFrame)
-        self.canvas = Canvas(self.canvasFrame, bg=self.settings.get("border", "#00ff00"), width=316, height=717)
+        self.canvas = Canvas(self.canvasFrame, bg=self.settings.get("border", "#00ff00"), width=315, height=718)
         self.canvas.grid(row=0, column=0, sticky=NSEW)
 
         self.topOfLeaderboardImage = PhotoImage(file="images/leaderboard.png")
-        self.canvas.create_image(182, 24, image=self.topOfLeaderboardImage, tags="topOfLeaderboardImage")
-        self.img2 = PhotoImage(file="images/leaderboard2.png")
+        self.canvas.create_image(159, 25, image=self.topOfLeaderboardImage, tags="topOfLeaderboardImage")
 
-        y = 46
+        y = 47
         for x in range(16):
-            self.canvas.create_rectangle(4, y, 215, y+40, tags="primaryRectangle", fill=self.settings.get("primaryRectangle", "blue"), width=0)
+            self.canvas.create_rectangle(4, y, 315, y+40, tags="primaryRectangle", fill=self.settings.get("primaryRectangle", "blue"), width=0)
             self.canvas.create_rectangle(215, y, 267, y+40, tags="secondaryRectangle", fill=self.settings.get("secondaryRectangle", "white"), width=0)
-            self.canvas.create_rectangle(267, y, 315, y+40, tags="primaryRectangle", fill=self.settings.get("primaryRectangle", "blue"), width=0)
             y += 42
 
         self.canvasFrame.grid(row=0, rowspan=4, column=2, padx=4, pady=4, sticky=NSEW)
@@ -405,14 +403,14 @@ class ClientWindow(Tk):
             self.canvas.delete("primaryText")
             self.canvas.delete("secondaryText")
             for chunk in sortedPlayerListChunks:
-                y = 66
+                y = 67
                 for player in chunk:
                     if not previousPlayer or previousPlayer.scoreAsString != player.scoreAsString:
                         place = idx
                     self.canvas.create_text(26, y, text=place, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), tags="primaryText")
                     self.canvas.create_text(48, y, text=player.name, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), anchor=W, tags="primaryText")
-                    self.canvas.create_text(240, y, text=player.scoreAsString, fill=self.settings.get("secondaryText", "black"), font=("Franklin Gothic Medium", 18), tags="secondaryText")
-                    self.canvas.create_text(292, y, text=player.currentHole, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), tags="primaryText")
+                    self.canvas.create_text(241, y, text=player.scoreAsString, fill=self.settings.get("secondaryText", "black"), font=("Franklin Gothic Medium", 18), tags="secondaryText")
+                    self.canvas.create_text(291, y, text=player.currentHole, fill=self.settings.get("primaryText", "white"), font=("Franklin Gothic Medium", 18), tags="primaryText")
                     y += 42
                     idx += 1
                     previousPlayer = player
@@ -564,9 +562,9 @@ class ClientWindow(Tk):
         CourseSelectWindow(self)
 
     def onLeaderboardSlotsSelect(self, e):
-        for x in range(2, 2 + 3*(self.leaderboardSlots.get())):
+        for x in range(2, 2 + 2*(self.leaderboardSlots.get())):
             self.canvas.itemconfig(x, state=NORMAL)
-        for x in range(2 + 3*(self.leaderboardSlots.get()), 50):
+        for x in range(2 + 2*(self.leaderboardSlots.get()), 34):
             self.canvas.itemconfig(x, state=HIDDEN)
 
     def onEndGame(self):
