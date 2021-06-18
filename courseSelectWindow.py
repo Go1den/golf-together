@@ -56,6 +56,8 @@ class CourseSelectWindow:
             self.parent.buttonStartGame.configure(state=DISABLED)
             self.parent.buttonEndGame.configure(state=NORMAL)
             self.parent.scoreUpdated = True
+            self.parent.canvas.delete("primaryText")
+            self.parent.canvas.delete("secondaryText")
             self.window.destroy()
         else:
             messagebox.showerror("Error", "You must select a game and course.", parent=self.window)
